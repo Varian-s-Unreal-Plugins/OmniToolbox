@@ -11,7 +11,7 @@ bool UOmniSpreadsheetObject::Initialize(const TArray<FText>& InHeaders)
 	}
 	
 	//Create directory if missing
-	const FString Directory = FPaths::ProjectSavedDir() / TEXT("CSV");
+	const FString Directory = FPaths::ProjectSavedDir() / TEXT("Spreadsheets");
 	IFileManager::Get().MakeDirectory(*Directory, true);
 
 	// Build timestamped filename
@@ -20,24 +20,24 @@ bool UOmniSpreadsheetObject::Initialize(const TArray<FText>& InHeaders)
 		Now.GetDay(), Now.GetMonth(), Now.GetYear(),
 		Now.GetHour(), Now.GetMinute(), Now.GetSecond());
 
-	const FString FileName = FString::Printf(TEXT("CSV_%s.xlsx"), *Timestamp);
+	const FString FileName = FString::Printf(TEXT("Spreadsheet_%s.xlsx"), *Timestamp);
 	FilePath = Directory / FileName;
 
-	// Save initial CSV with headers
+	// Save initial XLSX with headers
 	if (!Save())
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to create CSV file at %s"), *FilePath);
+		UE_LOG(LogTemp, Error, TEXT("Failed to create XLSX file at %s"), *FilePath);
 		return false;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Created new CSV: %s"), *FilePath);
+	UE_LOG(LogTemp, Log, TEXT("Created new XLSX: %s"), *FilePath);
 	return true;
 }
 
 bool UOmniSpreadsheetObject::Save()
 {
 	const FString Data = SerializeToString();
-	// Force UTF-8 encoding with BOM so Excel handles it properly
+	//Force UTF-8 encoding with BOM so Excel handles it properly
 	return FFileHelper::SaveStringToFile(Data, *FilePath, FFileHelper::EEncodingOptions::ForceUTF8);
 }
 

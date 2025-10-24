@@ -12,6 +12,15 @@
  * a XLSX file which can be passed around many objects.
  * This can be combined with a subsystem to allow any gameplay code
  * to easily add to a singular spreadsheet.
+ *
+ * To start, you call @Initialize and declare your headers.
+ * Headers are the columns at the very top and dictate how
+ * far a row can get.
+ *
+ * You then call @AddRowByName and store the index.
+ * You then call @GetColumnIndexByHeader and store the index
+ * To then modify a cell, you call @EditCell and pass in
+ * the stored row and column index to modify the cell.
  */
 UCLASS(NotBlueprintable, BlueprintType)
 class OMNITOOLBOX_API UOmniSpreadsheetObject : public UObject
@@ -20,11 +29,11 @@ class OMNITOOLBOX_API UOmniSpreadsheetObject : public UObject
 
 public:
 
-	/** Initialize a new CSV file (creates or overwrites existing file). */
+	/** Initialize a new XLSX file */
 	UFUNCTION(BlueprintCallable, Category = "Omni Spreadsheet Object")
 	bool Initialize(const TArray<FText>& InHeaders);
 
-	/** File path this CSV is managing */
+	/** File path to the XLSX this object is managing */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Omni Spreadsheet Object")
 	FString FilePath;
 
