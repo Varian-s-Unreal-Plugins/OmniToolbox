@@ -13,7 +13,7 @@
 #include "Kismet2/KismetEditorUtilities.h"
 #include "OmniToolbox/Public/OmniRuntimeMacros.h"
 
-Omni_OnModuleStarted("OmniToolbox")
+Omni_OnModuleStarted("OmniToolboxEditor")
 {
 	TArray<UClass*> Classes;
 	for(TObjectIterator<UClass> CurrentClass; CurrentClass; ++CurrentClass)
@@ -41,7 +41,7 @@ Omni_OnModuleStarted("OmniToolbox")
 	int32 CurrentIndex = 0;
 	for(UClass* Class : Classes)
 	{
-		const FString ClassName = "/Script/OmniToolbox.OmniFactoryDummy" + FString::FromInt(CurrentIndex++);
+		const FString ClassName = "/Script/OmniToolboxEditor.OmniFactoryDummy" + FString::FromInt(CurrentIndex++);
 		const TSubclassOf<UOmniFactory> FactoryClass = FindObject<UClass>(nullptr, *ClassName);
 		if(!FactoryClass)
 		{
