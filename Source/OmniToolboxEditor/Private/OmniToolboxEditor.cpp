@@ -1,4 +1,4 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright (C) Varian Daemon 2025. All Rights Reserved.
 
 #include "OmniToolboxEditor.h"
 

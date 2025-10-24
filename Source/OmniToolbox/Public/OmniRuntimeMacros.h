@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// Copyright (C) Varian Daemon 2025. All Rights Reserved.
+
+#pragma once
 
 #include "Subsystems/OmniEngineSubsystem.h"
 #include "OmniToolbox.h"
