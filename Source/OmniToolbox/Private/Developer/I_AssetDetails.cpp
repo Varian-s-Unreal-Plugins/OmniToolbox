@@ -12,7 +12,7 @@
 
 // Add default functionality here for any II_AssetDetails functions that are not pure virtual.
 
-Omni_OnModuleStarted("OmniToolbox")
+Omni_OnModuleStarted("OmniToolboxEditor")
 {
 #if WITH_EDITOR
 	UToolMenus* ToolMenus = UToolMenus::Get();
