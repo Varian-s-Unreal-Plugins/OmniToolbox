@@ -130,7 +130,7 @@ void UOmniEditorLibrary::RaiseScriptError(const FString& Message)
 	if (TopFrame)
 	{
 #if WITH_EDITOR
-		const FBlueprintExceptionInfo ExceptionInfo(EBlueprintExceptionType::UserRaisedError, FText::FromString(ErrorMessage));
+		const FBlueprintExceptionInfo ExceptionInfo(EBlueprintExceptionType::UserRaisedError, FText::FromString(Message));
 		FBlueprintCoreDelegates::ThrowScriptException(TopFrame->Object, *TopFrame, ExceptionInfo);
 #else
 		UE_LOG(LogBlueprintUserMessages, Error, TEXT("%s:\n%s"), *ErrorMessage, *TopFrame->GetStackTrace());
