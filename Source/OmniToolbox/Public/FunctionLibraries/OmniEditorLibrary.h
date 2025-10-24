@@ -35,4 +35,10 @@ public:
 
 	UFUNCTION(Category = "OmniToolbox|Editor", BlueprintCallable, meta = (DevelopmentOnly))
 	static void SendNotification(FString Message);
+
+	/**Since Epic in all their glory decided to make UKismetSystemLibrary::RaiseScriptError
+	 * not exportable, we have made our own.
+	 * If Epic ever add the ENGINE_API macro, this will be deprecated and changed to
+	 * simply call the regular RaiseScriptError */
+	static void RaiseScriptError(const FString& Message);
 };

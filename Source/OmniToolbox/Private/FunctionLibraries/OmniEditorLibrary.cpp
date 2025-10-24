@@ -3,6 +3,7 @@
 
 #include "FunctionLibraries/OmniEditorLibrary.h"
 
+#include "Blueprint/BlueprintExceptionInfo.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
@@ -120,4 +121,20 @@ void UOmniEditorLibrary::SendNotification(FString Message)
 	// 	})));
 	// FSlateNotificationManager::Get().AddNotification(Info)->SetCompletionState(SNotificationItem::CS_None);
 #endif
+}
+
+void UOmniEditorLibrary::RaiseScriptError(const FString& Message)
+{
+#if !(UE_BUILD_TEST || UE_BUILD_SHIPPING)
+	FFrame* TopFrame = FFrame::GetThreadLocalTopStackFrame();
+	if (TopFrame)
+	{
+#if WITH_EDITOR
+		const FBlueprintExceptionInfo ExceptionInfo(EBlueprintExceptionType::UserRaisedError, FText::FromString(ErrorMessage));
+		FBlueprintCoreDelegates::ThrowScriptException(TopFrame->Object, *TopFrame, ExceptionInfo);
+#else
+		UE_LOG(LogBlueprintUserMessages, Error, TEXT("%s:\n%s"), *ErrorMessage, *TopFrame->GetStackTrace());
+#endif	// WITH_EDITOR
+	}
+#endif	// !(UE_BUILD_TEST || UE_BUILD_SHIPPING)
 }
