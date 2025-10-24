@@ -54,6 +54,10 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 		AssetDefinition->Class = Class;
 		AssetDefinition->AssetDisplayName = Class->GetDisplayNameText();
 		AssetDefinition->AssetColor = II_AssetDetails::Execute_GetAssetColor(Class->GetDefaultObject());
+		if(AssetDefinition->AssetColor.Equals(FLinearColor()))
+		{
+			AssetDefinition->AssetColor = FColor::Cyan;
+		}
 		
 		FString PluginName;
 		const FString& ModuleDependency = FPackageName::GetShortName(Class->GetPackage()->GetName());
@@ -80,6 +84,11 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 		}
 		
 		Categories.Append(II_AssetDetails::Execute_GetAssetsCategories(Class->GetDefaultObject()));
+
+		if(Categories.IsEmpty())
+		{
+			Categories.Add(FText::FromString("Unknown assets"));
+		}
 
 		AssetDefinition->Categories = FAssetCategoryPath(Categories);
 		
