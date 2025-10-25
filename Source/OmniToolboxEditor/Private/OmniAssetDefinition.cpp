@@ -33,7 +33,7 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 		{
 			if(II_AssetDetails::Execute_AppearsInContextMenu(CurrentClass.LoadSynchronous()->GetDefaultObject()))
 			{
-				Classes.Add(CurrentClass.LoadSynchronous());
+				Classes.AddUnique(CurrentClass.LoadSynchronous());
 			}
 		}
 	}
