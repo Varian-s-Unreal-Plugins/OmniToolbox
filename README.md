@@ -9,8 +9,8 @@ OmniToolbox is a free and open-source plugin designed to provide numerous functi
 There are many features that are very impactful, but are too small to warrant their own plugin. This toolbox is essentially my collection of those features.
 
 Highlights include:
-- Quickly and easily add any asset into the content browser's context menu through UCLASS meta properties or config settings for blueprints.
-- Improved thumbnail renderer, including blueprint support.
+- Quickly and easily add any asset into the content browser's context menu by simply adding a interface.
+- Assets can easily control their own thumbnails through a universal thumbnail renderer.
 - Many C++ functions exposed to Blueprint, such as async traces, gameplay tag utility functions.
 - Useful tools and features too small to warrant their own plugin, such as Float Providers.
 - Useful macro's and utilities to simplify C++ code. 
