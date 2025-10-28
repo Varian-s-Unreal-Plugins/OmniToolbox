@@ -6,6 +6,31 @@
 #include "UObject/Interface.h"
 #include "I_AssetDetails.generated.h"
 
+USTRUCT(Blueprintable)
+struct FOmniDocumentationLinkAndText
+{
+	FOmniDocumentationLinkAndText() = default;
+
+	FOmniDocumentationLinkAndText(const FString& URL, const FString& Text)
+		: URL(URL),
+		  Text(Text)
+	{
+	}
+
+	explicit FOmniDocumentationLinkAndText(const FString& URL)
+		: URL(URL)
+	{
+	}
+
+	GENERATED_BODY()
+
+	UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite)
+	FString URL;
+
+	UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite)
+	FString Text;
+};
+
 // This class does not need to be modified.
 UINTERFACE()
 class OMNITOOLBOX_API UI_AssetDetails : public UInterface
@@ -19,8 +44,6 @@ inline UI_AssetDetails::UI_AssetDetails(const class FObjectInitializer& ObjectIn
 /**
  * This interface is required for a class to be automatically added
  * to the content browsers context menu
- * TODO: Add blueprint support
- * TODO: Add function for getting documentation URL, then add button through CommonActions extension menu to open URL
  */
 class OMNITOOLBOX_API II_AssetDetails
 {
@@ -44,5 +67,5 @@ public:
 	UTexture2D* GetThumbnail() const;
 
 	UFUNCTION(Category = "OmniToolbox|Asset Details", BlueprintNativeEvent)
-	FString GetDocumentationURL() const;
+	TArray<FOmniDocumentationLinkAndText> GetDocumentationLinks() const;
 };

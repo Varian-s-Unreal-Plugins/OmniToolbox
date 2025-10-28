@@ -60,24 +60,83 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 							break;
 						}
 
-						FString URL = II_AssetDetails::Execute_GetDocumentationURL(TargetObject);
-						if(URL.IsEmpty())
+						TArray<FOmniDocumentationLinkAndText> Links = II_AssetDetails::Execute_GetDocumentationLinks(TargetObject);
+						if(Links.IsEmpty())
 						{
-							/**No URL, we can't */
+							/**No links, we can't display anything */
 							break;
 						}
 
-						/**Add the button that when pressed, will open the URL*/
-						InSection.AddMenuEntry(
-								"OpenDocumentationURL",
-								INVTEXT("Open Documentation URL"),
-								INVTEXT("Open the documentation for this asset in your browser"),
-								FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.OpenInBrowser", "Icons.OpenInBrowser"),
-								FExecuteAction::CreateLambda([URL]()
+						if(Links.Num() == 1)
+						{
+							/**Add the button that when pressed, will open the URL*/
+							FString URL = Links[0].URL;
+							InSection.AddMenuEntry(
+									"OpenDocumentationURL",
+									INVTEXT("Open Documentation URL"),
+									INVTEXT("Open the documentation for this asset in your browser"),
+									FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.OpenInBrowser", "Icons.OpenInBrowser"),
+									FExecuteAction::CreateLambda([URL]()
+										{
+											FPlatformProcess::LaunchURL(*URL, nullptr, nullptr);
+										}));
+									break;
+						}
+
+						/**Populate the dropdown menu*/
+						FMenuBuilder DetailViewOptions(true, nullptr);
+						for(auto& CurrentLink : Links)
+						{
+							FString URL = CurrentLink.URL;
+							DetailViewOptions.AddMenuEntry(
+							TAttribute<FText>(FText::FromString(CurrentLink.Text)),
+							TAttribute<FText>(),
+								FSlateIcon(),
+								FUIAction(
+									FExecuteAction::CreateLambda([URL]
 									{
 										FPlatformProcess::LaunchURL(*URL, nullptr, nullptr);
-									}));
-								break;
+									}),
+									FCanExecuteAction()
+								),
+								NAME_None,
+								EUserInterfaceActionType::Button
+							);
+						}
+
+						/**Create a combo box and give it the populated dropdown menu*/
+						auto DocsCombo = SNew(SComboButton)
+						.ContentPadding(FMargin(4, 0))
+						.HasDownArrow(false)
+						.ForegroundColor(FSlateColor::UseForeground())
+						.ComboButtonStyle(FAppStyle::Get(), "SimpleComboButtonWithIcon")
+						.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("ViewOptions")))
+						.ToolTip(SNew(SToolTip).Text((INVTEXT("View documentation for this asset"))))
+						.MenuContent()
+						[
+							DetailViewOptions.MakeWidget()
+						]
+						.ButtonContent()
+						[
+							SNew(SHorizontalBox)
+							+ SHorizontalBox::Slot()
+							.AutoWidth()
+							.Padding(6, 0)
+							.HAlign(HAlign_Fill)
+							[
+								SNew(SImage)
+								.DesiredSizeOverride(FVector2D(20, 20))
+								.Image(FAppStyle::Get().GetBrush("Icons.OpenInBrowser"))
+								.ColorAndOpacity(FSlateColor::UseForeground())
+							]
+						];
+
+						InSection.AddEntry(FToolMenuEntry::InitWidget(
+							"ViewDocs",
+							DocsCombo,
+							INVTEXT("View Documentation")));
+
+						break;
 					}
 				}
 			}
