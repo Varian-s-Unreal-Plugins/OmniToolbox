@@ -3,6 +3,9 @@
 
 #include "FunctionLibraries/OmniHelperLibrary.h"
 #include "Components/ActorComponent.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
+#include "TimerManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 
@@ -135,4 +138,58 @@ FVector UOmniHelperLibrary::GetCursorPointOnPlane(UObject* WorldContext, const F
 
 	float T = FVector::DotProduct(PlanePoint - RayOrigin, PlaneNormal) / Denom;
 	return RayOrigin + RayDir * T;
+}
+
+UOmniDelayWithPayload* UOmniDelayWithPayload::DelayWithPayload(UObject* WorldContext, float Delay,
+	FInstancedStruct Payload)
+{
+	UOmniDelayWithPayload* AsyncNode = NewObject<UOmniDelayWithPayload>(WorldContext);
+	AsyncNode->DelayLength = Delay;
+	AsyncNode->PayloadData = Payload;
+	return AsyncNode;
+}
+
+void UOmniDelayWithPayload::Activate()
+{	
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([this]
+	{
+		Completed.Broadcast(PayloadData);
+		SetReadyToDestroy();
+	}), DelayLength, false);
+}
+
+UOmniAsyncLoadClassWithPayload* UOmniAsyncLoadClassWithPayload::AsyncLoadClassWithPayload(UObject* WorldContext,
+	TSoftClassPtr<UObject> Class, FInstancedStruct Payload)
+{
+	UOmniAsyncLoadClassWithPayload* AsyncNode = NewObject<UOmniAsyncLoadClassWithPayload>(WorldContext);
+	AsyncNode->ClassToLoad = Class;
+	AsyncNode->PayloadData = Payload;
+	return AsyncNode;
+}
+
+void UOmniAsyncLoadClassWithPayload::Activate()
+{
+	UAssetManager::GetStreamableManager().RequestAsyncLoad(ClassToLoad.ToSoftObjectPath(), [this]
+	{
+		Completed.Broadcast(PayloadData);
+		SetReadyToDestroy();
+	});
+}
+
+UOmniAsyncLoadAssetWithPayload* UOmniAsyncLoadAssetWithPayload::AsyncLoadAssetWithPayload(UObject* WorldContext,
+	TSoftObjectPtr<UObject> Asset, FInstancedStruct Payload)
+{
+	UOmniAsyncLoadAssetWithPayload* AsyncNode = NewObject<UOmniAsyncLoadAssetWithPayload>(WorldContext);
+	AsyncNode->AssetToLoad = Asset;
+	AsyncNode->PayloadData = Payload;
+	return AsyncNode;
+}
+
+void UOmniAsyncLoadAssetWithPayload::Activate()
+{
+	UAssetManager::GetStreamableManager().RequestAsyncLoad(AssetToLoad.ToSoftObjectPath(), [this]
+	{
+		Completed.Broadcast(PayloadData);
+		SetReadyToDestroy();
+	});
 }

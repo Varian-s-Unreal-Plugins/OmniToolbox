@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/BlueprintAsyncActionBase.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
+#include "Engine/TimerHandle.h"
 #include "OmniHelperLibrary.generated.h"
 
 /**
@@ -108,4 +110,63 @@ class OMNITOOLBOX_API UOmniHelperLibrary : public UBlueprintFunctionLibrary
 	
 	UFUNCTION(Category = "OmniToolbox|Cursor", BlueprintCallable, meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
 	static FVector GetCursorPointOnPlane(UObject* WorldContext, const FVector& PlanePoint, const FVector& PlaneNormal);
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOmniDelayPayloadEvent, FInstancedStruct, Payload);
+
+UCLASS()
+class UOmniDelayWithPayload : public UBlueprintAsyncActionBase
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(Category = "Delay With Payload", BlueprintAssignable)
+	FOmniDelayPayloadEvent Completed;
+
+	float DelayLength;
+	FInstancedStruct PayloadData;
+
+	FTimerHandle TimerHandle;
+
+	UFUNCTION(Category = "OmniToolbox", BlueprintCallable, meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext", DisplayName = "Delay (With payload)", BlueprintInternalUseOnly = "true"))
+	static UOmniDelayWithPayload* DelayWithPayload(UObject* WorldContext, float Delay, FInstancedStruct Payload);
+
+	virtual void Activate() override;
+};
+
+UCLASS()
+class UOmniAsyncLoadClassWithPayload : public UBlueprintAsyncActionBase
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(Category = "Async Load Class With Payload", BlueprintAssignable)
+	FOmniDelayPayloadEvent Completed;
+	TSoftClassPtr<UObject> ClassToLoad;
+	FInstancedStruct PayloadData;
+
+	UFUNCTION(Category = "OmniToolbox", BlueprintCallable, meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext", DisplayName = "Async Load Class (With payload)", BlueprintInternalUseOnly = "true"))
+	static UOmniAsyncLoadClassWithPayload* AsyncLoadClassWithPayload(UObject* WorldContext, TSoftClassPtr<UObject> Class, FInstancedStruct Payload);
+
+	virtual void Activate() override;
+};
+
+UCLASS()
+class UOmniAsyncLoadAssetWithPayload : public UBlueprintAsyncActionBase
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(Category = "Async Load Class With Payload", BlueprintAssignable)
+	FOmniDelayPayloadEvent Completed;
+	TSoftObjectPtr<UObject> AssetToLoad;
+	FInstancedStruct PayloadData;
+
+	UFUNCTION(Category = "OmniToolbox", BlueprintCallable, meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext", DisplayName = "Async Load Asset (With payload)", BlueprintInternalUseOnly = "true"))
+	static UOmniAsyncLoadAssetWithPayload* AsyncLoadAssetWithPayload(UObject* WorldContext, TSoftObjectPtr<UObject> Asset, FInstancedStruct Payload);
+
+	virtual void Activate() override;
 };
