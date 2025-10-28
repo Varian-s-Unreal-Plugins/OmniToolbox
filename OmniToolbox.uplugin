@@ -2,13 +2,14 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
+	"VersionName": "0.1",
 	"FriendlyName": "OmniToolbox",
 	"Description": "Set of tools to aid developers.",
 	"Category": "Other",
 	"CreatedBy": "Varian",
 	"CreatedByURL": "",
 	"DocsURL": "https://varian.gitbook.io/varian-docs/omnitoolbox/",
-	"MarketplaceURL": "",
+	"MarketplaceURL": "https://www.fab.com/portal/listings/ec3db931-509e-4c1b-b883-0831d86c8077/",
 	"CanContainContent": true,
 	"EnabledByDefault": true,
 	"IsBetaVersion": true,
@@ -18,12 +19,22 @@
 		{
 			"Name": "OmniToolbox",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"Linux"
+			]
 		},
 		{
 			"Name": "OmniToolboxEditor",
-			"Type": "Runtime",
-			"LoadingPhase": "PostEngineInit"
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"Linux"
+			]
 		}
 	],
 	"Plugins": [
