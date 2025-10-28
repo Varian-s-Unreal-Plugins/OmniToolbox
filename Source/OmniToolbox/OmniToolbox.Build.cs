@@ -1,4 +1,6 @@
-﻿using UnrealBuildTool;
+﻿// Copyright (C) Varian Daemon 2025. All Rights Reserved.
+
+using UnrealBuildTool;
 using System.IO;       // Required for Directory and Path
 
 public class OmniToolbox : ModuleRules

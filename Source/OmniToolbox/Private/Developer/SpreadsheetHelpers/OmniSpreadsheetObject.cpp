@@ -2,6 +2,8 @@
 
 
 #include "Developer/SpreadsheetHelpers/OmniSpreadsheetObject.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 bool UOmniSpreadsheetObject::Initialize(const TArray<FText>& InHeaders)
 {
@@ -20,7 +22,7 @@ bool UOmniSpreadsheetObject::Initialize(const TArray<FText>& InHeaders)
 		Now.GetDay(), Now.GetMonth(), Now.GetYear(),
 		Now.GetHour(), Now.GetMinute(), Now.GetSecond());
 
-	const FString FileName = FString::Printf(TEXT("Spreadsheet_%s.xlsx"), *Timestamp);
+	const FString FileName = FString::Printf(TEXT("%s.xlsx"), *Timestamp);
 	FilePath = Directory / FileName;
 
 	// Save initial XLSX with headers

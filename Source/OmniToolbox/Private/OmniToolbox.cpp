@@ -1,4 +1,6 @@
-﻿#include "OmniToolbox.h"
+﻿// Copyright (C) Varian Daemon 2025. All Rights Reserved.
+
+#include "OmniToolbox.h"
 
 #define LOCTEXT_NAMESPACE "FOmniToolboxRuntimeModule"
 

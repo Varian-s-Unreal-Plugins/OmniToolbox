@@ -6,10 +6,10 @@
 #include "Blueprint/BlueprintExceptionInfo.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
-
-#if WITH_EDITOR
 #include "Engine/Console.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/Stack.h"
+#if WITH_EDITOR
 #include "Kismet2/BlueprintEditorUtils.h"
 #endif
 
@@ -133,7 +133,7 @@ void UOmniEditorLibrary::RaiseScriptError(const FString& Message)
 		const FBlueprintExceptionInfo ExceptionInfo(EBlueprintExceptionType::UserRaisedError, FText::FromString(Message));
 		FBlueprintCoreDelegates::ThrowScriptException(TopFrame->Object, *TopFrame, ExceptionInfo);
 #else
-		UE_LOG(LogBlueprintUserMessages, Error, TEXT("%s:\n%s"), *ErrorMessage, *TopFrame->GetStackTrace());
+		UE_LOG(LogBlueprintUserMessages, Error, TEXT("%s:\n%s"), *Message, *TopFrame->GetStackTrace());
 #endif	// WITH_EDITOR
 	}
 #endif	// !(UE_BUILD_TEST || UE_BUILD_SHIPPING)
