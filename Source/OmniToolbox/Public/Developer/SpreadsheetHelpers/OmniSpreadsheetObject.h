@@ -44,11 +44,11 @@ public:
 	int32 AddRowByName(FString RowName, bool bAutoSave = true);
 
 	/** Finds a column index by its header name. Returns -1 if not found. */
-	UFUNCTION(BlueprintPure, Category = "Omni Spreadsheet Object")
+	UFUNCTION(Category = "Omni Spreadsheet Object", BlueprintPure)
 	int32 GetColumnIndexByHeader(FText HeaderName);
 
 	/** Edits a specific cell by row/column index. */
-	UFUNCTION(BlueprintPure, Category = "Omni Spreadsheet Object")
+	UFUNCTION(Category = "Omni Spreadsheet Object", BlueprintCallable)
 	bool EditCell(int32 RowIndex, int32 ColumnIndex, FString NewValue, bool bAutoSave = true);
 
 	FString SerializeToString() const;
