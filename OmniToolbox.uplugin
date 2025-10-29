@@ -1,7 +1,6 @@
 ﻿{
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
 	"VersionName": "0.1",
 	"FriendlyName": "OmniToolbox",
 	"Description": "Set of tools to aid developers.",
