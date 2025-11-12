@@ -2,6 +2,8 @@
 
 
 #include "FunctionLibraries/OmniHelperLibrary.h"
+
+#include "FloatProvider.h"
 #include "Components/ActorComponent.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -140,8 +142,32 @@ FVector UOmniHelperLibrary::GetCursorPointOnPlane(UObject* WorldContext, const F
 	return RayOrigin + RayDir * T;
 }
 
+float UOmniHelperLibrary::GetFloatFromFloatProvider(FOmniFloatProvider FloatProvider)
+{
+	if(FloatProvider.FloatProvider.IsValid())
+	{
+		return FloatProvider.FloatProvider.GetMutablePtr<>()->GetFloat();
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+float UOmniHelperLibrary::GetFloatFromInstancedFloatProvider(FInstancedStruct FloatProvider)
+{
+	if(FloatProvider.IsValid() && FloatProvider.GetMutablePtr<FFloatProviderData>())
+	{
+		return FloatProvider.GetMutablePtr<FFloatProviderData>()->GetFloat();
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 UOmniDelayWithPayload* UOmniDelayWithPayload::DelayWithPayload(UObject* WorldContext, float Delay,
-	FInstancedStruct Payload)
+                                                               FInstancedStruct Payload)
 {
 	UOmniDelayWithPayload* AsyncNode = NewObject<UOmniDelayWithPayload>(WorldContext);
 	AsyncNode->DelayLength = Delay;

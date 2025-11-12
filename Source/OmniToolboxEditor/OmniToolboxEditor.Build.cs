@@ -46,7 +46,9 @@ public class OmniToolboxEditor : ModuleRules
 				"UMGEditor",
 				"AssetTools",
 				"AssetDefinition", 
-				"OmniToolbox"
+				"OmniToolbox", 
+				"StructUtilsEditor", 
+				"PropertyBindingUtilsEditor"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

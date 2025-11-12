@@ -9,6 +9,7 @@
 #include "OmniAssetDefinition.h"
 #include "WidgetBlueprint.h"
 #include "Config/DS_OmniToolboxSettings.h"
+#include "Customizations/FloatProvidersCustomization.h"
 
 
 #define LOCTEXT_NAMESPACE "FOmniToolboxEditorModule"

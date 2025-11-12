@@ -9,6 +9,7 @@
 #include "Engine/TimerHandle.h"
 #include "OmniHelperLibrary.generated.h"
 
+struct FOmniFloatProvider;
 /**
  * Find the first struct of type T in an array of FInstancedStruct and return a mutable pointer.
  * Returns nullptr if not found.
@@ -110,6 +111,12 @@ class OMNITOOLBOX_API UOmniHelperLibrary : public UBlueprintFunctionLibrary
 	
 	UFUNCTION(Category = "OmniToolbox|Cursor", BlueprintCallable, meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
 	static FVector GetCursorPointOnPlane(UObject* WorldContext, const FVector& PlanePoint, const FVector& PlaneNormal);
+
+	UFUNCTION(Category = "OmniToolbox", BlueprintPure)
+	static float GetFloatFromFloatProvider(FOmniFloatProvider FloatProvider);
+
+	UFUNCTION(Category = "OmniToolbox", BlueprintPure)
+	static float GetFloatFromInstancedFloatProvider(FInstancedStruct FloatProvider);
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOmniDelayPayloadEvent, FInstancedStruct, Payload);

@@ -10,7 +10,10 @@
 #include "UObject/Object.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/DataTable.h"
+#include "StructUtils/InstancedStruct.h"
 #include "FloatProvider.generated.h"
+
+
 
 /**Base struct for other instanced structs to inherit from.
  * Children structs will need to perform some logic with
@@ -18,13 +21,13 @@
  * For example, a struct that holds a runtime float curve
  * or a struct that holds a scalable float.*/
 USTRUCT(BlueprintType)
-struct FFloatProvider
+struct FFloatProviderData
 {
 	GENERATED_BODY()
-	FFloatProvider() = default;
-	explicit FFloatProvider(float BaseValue)
+	FFloatProviderData() = default;
+	explicit FFloatProviderData(float BaseValue)
 	: BaseValue(BaseValue)	{}
-	virtual ~FFloatProvider() = default;
+	virtual ~FFloatProviderData() = default;
 
 	/**Many children of this float provider system require a
 	 * base float to evaluate their data. Such as FRuntimeFloatCurve. */
@@ -43,8 +46,35 @@ struct FFloatProvider
 	}
 };
 
+/**
+ * Wrapper struct to achieve 3 things:
+ * 1. It does not seem to be possible to customize the
+ * header for TInstancedStruct variables, UNLESS you wrap
+ * them into another struct. All in-engine examples do this.
+ * 2. Since blueprint users cannot create instanced structs,
+ * they can make this struct, and we will handle the rest.
+ * 3. Since we can now customize the provided FloatProvider,
+ * we can enforce a basic float at all times. This means
+ * there's no risk of accidentally assigning a null
+ * float provider type, which could cause crashes
+ * or unwanted behavior.
+ */
+USTRUCT(BlueprintType)
+struct FOmniFloatProvider
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite, meta = (ShowTreeView))
+	TInstancedStruct<FFloatProviderData> FloatProvider;
+
+	float GetFloat()
+	{
+		return FloatProvider.GetMutable<>().GetFloat();
+	}
+};
+
 USTRUCT(BlueprintType, DisplayName = "Basic Float")
-struct FBasicFloatProvider : public FFloatProvider
+struct FBasicFloatProvider : public FFloatProviderData
 {
 	GENERATED_BODY()
 	
@@ -58,7 +88,7 @@ struct FBasicFloatProvider : public FFloatProvider
 };
 
 USTRUCT(BlueprintType, DisplayName = "Runtime Curve")
-struct FRuntimeFloatProvider : public FFloatProvider
+struct FRuntimeFloatProvider : public FFloatProviderData
 {
 	GENERATED_BODY()
 	
@@ -96,7 +126,7 @@ struct FRuntimeFloatProvider : public FFloatProvider
  *
  * Requires world context to be assigned. */
 USTRUCT(BlueprintType, DisplayName = "Object Tag Value")
-struct FObjectTagValueProvider : public FFloatProvider
+struct FObjectTagValueProvider : public FFloatProviderData
 {
 	GENERATED_BODY()
 
@@ -128,11 +158,11 @@ struct FFloatProviderDataTable : public FTableRowBase
 
 /**Retrieves a float from a data table and a specific row.*/
 USTRUCT(BlueprintType, DisplayName = "Float Table")
-struct FDataTableFloatProvider : public FFloatProvider
+struct FDataTableFloatProvider : public FFloatProviderData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Category = "", EditAnywhere, BlueprintReadOnly, meta = (RowType = "/Script/OmniToolboxRuntime.FloatProviderDataTable"))
+	UPROPERTY(Category = "", EditAnywhere, BlueprintReadOnly, meta = (RowType = "/Script/OmniToolbox.FloatProviderDataTable"))
 	FDataTableRowHandle FloatTable;
 
 	virtual float GetFloat() override
