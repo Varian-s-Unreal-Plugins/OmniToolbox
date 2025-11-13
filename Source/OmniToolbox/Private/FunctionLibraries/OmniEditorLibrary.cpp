@@ -138,3 +138,13 @@ void UOmniEditorLibrary::RaiseScriptError(const FString& Message)
 	}
 #endif	// !(UE_BUILD_TEST || UE_BUILD_SHIPPING)
 }
+
+void UOmniEditorLibrary::AddInstanceComponent(AActor* Actor, UActorComponent* Component)
+{
+	if(Actor && Component)
+	{
+		Actor->PreEditChange(nullptr);
+		Actor->AddInstanceComponent(Component);
+		Actor->PostEditChange();
+	}
+}

@@ -41,4 +41,10 @@ public:
 	 * If Epic ever add the ENGINE_API macro, this will be deprecated and changed to
 	 * simply call the regular RaiseScriptError */
 	static void RaiseScriptError(const FString& Message);
+	
+	/**When adding components to a level actor through an editor tool,
+	 * it might in some cases not serialize or appear correctly.
+	 * This calls a C++-only function, which is meant to handle that scenario. */
+	UFUNCTION(Category = "OmniToolbox|Editor", BlueprintCallable, meta = (DevelopmentOnly))
+	static void AddInstanceComponent(AActor* Actor, UActorComponent* Component);
 };
