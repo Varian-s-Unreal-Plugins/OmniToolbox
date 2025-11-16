@@ -11,6 +11,7 @@
 #include "UObject/Stack.h"
 #if WITH_EDITOR
 #include "Kismet2/BlueprintEditorUtils.h"
+#include "Interfaces/IPluginManager.h"
 #endif
 
 bool UOmniEditorLibrary::ImplementInterface(UObject* InstigatingObject, UObject* TargetObject, UClass* Interface, TArray<FString> CustomMessages)
@@ -147,4 +148,54 @@ void UOmniEditorLibrary::AddInstanceComponent(AActor* Actor, UActorComponent* Co
 		Actor->AddInstanceComponent(Component);
 		Actor->PostEditChange();
 	}
+}
+
+void UOmniEditorLibrary::SetComponentEditorOnly(UActorComponent* Component, bool NewEditorOnly)
+{
+	if(Component)
+	{
+		Component->bIsEditorOnly = NewEditorOnly;
+	}
+}
+
+void UOmniEditorLibrary::MakeComponentInvisibleInActorComponents(UActorComponent* Component)
+{
+	if(Component)
+	{
+		Component->SetIsVisualizationComponent(true); 
+	}
+}
+
+FString UOmniEditorLibrary::GetPluginNameForClass(UClass* Class)
+{
+#if WITH_EDITOR
+	
+	if(Class)
+	{
+		const FString& ModuleDependency = FPackageName::GetShortName(Class->GetPackage()->GetName());
+		
+		TArray<FModuleStatus> ModuleStatuses;
+		const FModuleManager& ModuleManager = FModuleManager::Get();
+		ModuleManager.QueryModules(ModuleStatuses);
+		for (FModuleStatus& ModuleStatus : ModuleStatuses)
+		{
+			if (ModuleStatus.bIsLoaded && ModuleStatus.Name == ModuleDependency)
+			{
+				// this is the module's plugin
+				const TSharedPtr<IPlugin>& OwnerPlugin = IPluginManager::Get().GetModuleOwnerPlugin(*ModuleDependency);
+				if(OwnerPlugin.IsValid())
+				{
+					return OwnerPlugin->GetFriendlyName();
+				}
+			}
+		}
+	}
+	
+	return "";
+	
+#else
+	
+	return "";
+	
+#endif
 }

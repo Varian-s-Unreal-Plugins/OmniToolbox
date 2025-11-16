@@ -9,7 +9,7 @@
 #include "OmniClassPickerDialogue.h"
 #include "Config/DS_OmniToolboxSettings.h"
 #include "Developer/I_AssetDetails.h"
-#include "Interfaces/IPluginManager.h"
+#include "FunctionLibraries/OmniEditorLibrary.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "OmniToolbox/Public/OmniRuntimeMacros.h"
 
@@ -59,24 +59,7 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 			AssetDefinition->AssetColor = FColor::Cyan;
 		}
 		
-		FString PluginName;
-		const FString& ModuleDependency = FPackageName::GetShortName(Class->GetPackage()->GetName());
-		
-		TArray<FModuleStatus> ModuleStatuses;
-		const FModuleManager& ModuleManager = FModuleManager::Get();
-		ModuleManager.QueryModules(ModuleStatuses);
-		for (FModuleStatus& ModuleStatus : ModuleStatuses)
-		{
-			if (ModuleStatus.bIsLoaded && ModuleStatus.Name == ModuleDependency)
-			{
-				// this is the module's plugin
-				const TSharedPtr<IPlugin>& OwnerPlugin = IPluginManager::Get().GetModuleOwnerPlugin(*ModuleDependency);
-				if(OwnerPlugin.IsValid())
-				{
-					PluginName = OwnerPlugin->GetFriendlyName();
-				}
-			}
-		}
+		FString PluginName = UOmniEditorLibrary::GetPluginNameForClass(Class);
 
 		if(PluginName.IsEmpty() == false)
 		{

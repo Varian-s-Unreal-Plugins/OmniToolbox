@@ -48,7 +48,8 @@ public class OmniToolboxEditor : ModuleRules
 				"AssetDefinition", 
 				"OmniToolbox", 
 				"StructUtilsEditor", 
-				"PropertyBindingUtilsEditor"
+				"PropertyBindingUtilsEditor", 
+				"PlacementMode"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -47,4 +47,12 @@ public:
 	 * This calls a C++-only function, which is meant to handle that scenario. */
 	UFUNCTION(Category = "OmniToolbox|Editor", BlueprintCallable, meta = (DevelopmentOnly))
 	static void AddInstanceComponent(AActor* Actor, UActorComponent* Component);
+	
+	UFUNCTION(Category = "OmniToolbox|Editor", BlueprintCallable, meta = (DevelopmentOnly))
+	static void SetComponentEditorOnly(UActorComponent* Component, bool NewEditorOnly);
+	
+	UFUNCTION(Category = "OmniToolbox|Editor", BlueprintCallable, meta = (DevelopmentOnly))
+	static void MakeComponentInvisibleInActorComponents(UActorComponent* Component);
+	
+	static FString GetPluginNameForClass(UClass* Class);
 };
