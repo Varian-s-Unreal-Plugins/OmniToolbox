@@ -3,6 +3,7 @@
 
 #include "Subsystems/OmniEngineSubsystem.h"
 
+#include "IPlacementModeModule.h"
 #include "Interfaces/IPluginManager.h"
 #include "Styling/SlateStyleRegistry.h"
 
@@ -46,5 +47,31 @@ void UOmniEngineSubsystem::RegisterClassIcon(const FString& PluginName, const FS
 	StyleSet->Set(IconName, new IMAGE_BRUSH_SVG(StyleSet, SvgName, FVector2D(16)));
 	StyleSet->Set(ThumbnailName, new IMAGE_BRUSH_SVG(StyleSet, SvgName, FVector2D(64)));
 
+#endif
+}
+
+void UOmniEngineSubsystem::RegisterPlacementPaletteCategory(FString Category, FString DisplayName, FString SVG,
+	int32 SortOrder)
+{
+	FPlacementCategoryInfo CategoryInfo(                                       
+	FText::FromString(Category),                                               
+	FSlateIcon(FAppStyle::GetAppStyleSetName(), FName(SVG)),                                 
+	FName(Category),                                                               
+	Category,                                                          
+	SortOrder                                                                     
+	);                                                                               
+	CategoryInfo.ShortDisplayName = FText::FromString(DisplayName);	
+	IPlacementModeModule::Get().RegisterPlacementCategory(CategoryInfo);             
+}
+
+void UOmniEngineSubsystem::AddClassToPlacementPalette(FString Category, UClass* Class)
+{
+#if WITH_EDITOR
+	const FPlacementCategoryInfo* Info = IPlacementModeModule::Get().GetRegisteredPlacementCategory(FName(Category));
+	if(Info)
+	{
+		IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShareable( new FPlaceableItem(nullptr, FAssetData(Class)) ));
+	}
+	
 #endif
 }

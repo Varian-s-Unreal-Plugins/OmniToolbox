@@ -12,6 +12,7 @@
 
 // Add default functionality here for any II_AssetDetails functions that are not pure virtual.
 
+/**Handle the documentation button*/
 Omni_OnModuleStarted("OmniToolboxEditor")
 {
 #if WITH_EDITOR

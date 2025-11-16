@@ -44,7 +44,7 @@ public class OmniToolbox : ModuleRules
                 "Slate",
                 "SlateCore", 
                 "GameplayTags",
-                "Projects", 
+                "Projects",
             }
         );
         
@@ -54,7 +54,8 @@ public class OmniToolbox : ModuleRules
             {
                 "UnrealEd", 
                 "GameplayTagsEditor",
-                "ToolMenus"
+                "ToolMenus",
+                "PlacementMode", 
             });
         }
     }

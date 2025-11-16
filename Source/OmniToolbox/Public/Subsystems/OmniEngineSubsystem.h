@@ -20,6 +20,9 @@ class OMNITOOLBOX_API UOmniEngineSubsystem : public UEngineSubsystem
 public:
 	//Adds or updates a class icon for a given plugin
 	void RegisterClassIcon(const FString& PluginName, const FString& ClassName, const FString& SvgName);
+	
+	void RegisterPlacementPaletteCategory(FString Category, FString DisplayName, FString SVG, int32 SortOrder);
+	void AddClassToPlacementPalette(FString Category, UClass* Class);
 
 private:
 

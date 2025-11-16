@@ -34,8 +34,31 @@ struct FOmniRunOnStartupHelper
 	}
 };
 
+struct FOmniRunOnPostEngineInitHelper
+{
+	FOmniRunOnPostEngineInitHelper(TFunction<void()> InLambda)
+	{
+		FCoreDelegates::OnPostEngineInit.AddLambda(
+			[InLambda]()
+			{
+				InLambda();
+			}
+		);
+
+		//TODO: Find out if we can execute the lambda if the editor is already started, but I don't see how that would happen
+	}
+};
+
 template<int32 N>
 struct TOmniCounterDummy { TOmniCounterDummy() = default; };
+
+#define Omni_OnPostEngineInit() \
+static void OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__>); \
+static const FOmniRunOnPostEngineInitHelper PREPROCESSOR_JOIN(FOmniRunOnPostEngineInitHelper, __COUNTER__)([] \
+{ \
+OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__ - 2>()); \
+}); \
+static void OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__ - 3>)
 
 #define Omni_OnModuleStarted(ModuleName) \
 static void OmniStartupFunction(TOmniCounterDummy<__COUNTER__>); \
@@ -82,3 +105,21 @@ static void PREPROCESSOR_JOIN(OmniSetClassIcon_Init_, __COUNTER__)();
 // 	});                                                                                \
 // 	static void PREPROCESSOR_JOIN(OmniSetClassIcon_Init_, OmniSetClassIcon_Counter)(); \
 // 	UE_ENABLE_OPTIMIZATION
+
+#define Omni_PlacementPaletteCategory(PluginName, NameToDisplay, SVGName, SortOrder)     \
+Omni_OnModuleStarted("PlacementMode")                                                    \
+{\
+if (UOmniEngineSubsystem* OmniStyle = GEngine->GetEngineSubsystem<UOmniEngineSubsystem>()) \
+{ \
+OmniStyle->RegisterPlacementPaletteCategory(PluginName, NameToDisplay, SVGName, SortOrder); \
+} \
+}
+
+#define Omni_AddActorToPlacementPaletteCategory(Category, Class) \
+Omni_OnPostEngineInit() \
+{ \
+	if (UOmniEngineSubsystem* OmniStyle = GEngine->GetEngineSubsystem<UOmniEngineSubsystem>()) \
+	{ \
+		OmniStyle->AddClassToPlacementPalette(Category, Class); \
+	} \
+}

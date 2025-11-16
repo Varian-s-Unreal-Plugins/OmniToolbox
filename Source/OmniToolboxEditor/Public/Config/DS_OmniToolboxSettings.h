@@ -11,10 +11,22 @@
 #include "Engine/DeveloperSettings.h"
 #include "DS_OmniToolboxSettings.generated.h"
 
+USTRUCT()
+struct FOmniPlaceableCategoryItem
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(Category = "", EditAnywhere)
+	TSoftClassPtr<AActor> Actor;
+	
+	UPROPERTY(Category = "", EditAnywhere)
+	FName Category;
+};
+
 /**
  * 
  */
-UCLASS(Config = EditorPerProjectUserSettings, meta = (DisplayName = "OmniToolbox"))
+UCLASS(Config = Editor, defaultconfig, meta = (DisplayName = "OmniToolbox"))
 class OMNITOOLBOXEDITOR_API UDS_OmniToolboxSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -35,4 +47,7 @@ public:
 	/***/
 	UPROPERTY(Category = "Content Browser", config, EditAnywhere, meta = (MustImplement = "/Script/OmniToolboxRuntime.I_AssetDetails"))
 	TArray<TSoftClassPtr<UObject>> ContextMenuEntries;
+	
+	UPROPERTY(Category = "Placement Palette", config, EditAnywhere)
+	TArray<FOmniPlaceableCategoryItem> PlacementPaletteActors;
 };
