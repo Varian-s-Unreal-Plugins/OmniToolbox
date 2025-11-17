@@ -63,6 +63,8 @@ USTRUCT(BlueprintType)
 struct FOmniFloatProvider
 {
 	GENERATED_BODY()
+	
+	FOmniFloatProvider() = default;
 
 	UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite, meta = (ShowTreeView))
 	TInstancedStruct<FFloatProviderData> FloatProvider;
@@ -70,6 +72,19 @@ struct FOmniFloatProvider
 	float GetFloat()
 	{
 		return FloatProvider.GetMutable<>().GetFloat();
+	}
+	
+	/**Accept any provider derived from FFloatProviderData
+	 * This allows you to create float provider variables like so:
+	 * FOmniFloatProvider MyProvider = FBasicFloatProvider(3000)
+	 * and you'll now have the basic float provider assigned to 3000
+	 * by default. A float provider must have a constructor for
+	 * this to work.*/
+	template<typename T,
+		typename = std::enable_if_t<std::is_base_of_v<FFloatProviderData, T>>>
+	FOmniFloatProvider(const T& Provider)
+	{
+		FloatProvider.InitializeAs<T>(Provider);
 	}
 };
 
@@ -80,6 +95,14 @@ struct FBasicFloatProvider : public FFloatProviderData
 	
 	UPROPERTY(Category = "", EditAnywhere, BlueprintReadOnly)
 	float FloatValue = 0;
+	
+	FBasicFloatProvider() = default;
+
+	explicit FBasicFloatProvider(float InValue)
+	{
+		FloatValue = InValue;
+		BaseValue = InValue;
+	}
 
 	virtual float GetFloat() override
 	{
