@@ -150,7 +150,8 @@ void FFloatProvidersCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> S
 	}
 	else
 	{
-		HeaderRow.WholeRowContent()
+		HeaderRow.NameContent()[StructPropertyHandle->CreatePropertyNameWidget()]
+			.ValueContent()
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
