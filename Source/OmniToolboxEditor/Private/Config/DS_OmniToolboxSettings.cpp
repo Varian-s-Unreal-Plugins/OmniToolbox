@@ -3,9 +3,12 @@
 
 #include "Config/DS_OmniToolboxSettings.h"
 
+#if WITH_EDITOR
 #include "IPlacementModeModule.h"
+#endif
 #include "OmniRuntimeMacros.h"
 
+#if WITH_EDITOR
 Omni_OnModuleStarted("OmniToolboxEditor")
 {
 	for(auto& CurrentClass : GetDefault<UDS_OmniToolboxSettings>()->PlacementPaletteActors)
@@ -22,3 +25,4 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 		}
 	}
 }
+#endif

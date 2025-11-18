@@ -3,7 +3,9 @@
 
 #include "Subsystems/OmniEngineSubsystem.h"
 
+#if WITH_EDITOR
 #include "IPlacementModeModule.h"
+#endif
 #include "Interfaces/IPluginManager.h"
 #include "Styling/SlateStyleRegistry.h"
 
@@ -53,24 +55,40 @@ void UOmniEngineSubsystem::RegisterClassIcon(const FString& PluginName, const FS
 void UOmniEngineSubsystem::RegisterPlacementPaletteCategory(FString Category, FString DisplayName, FString SVG,
 	int32 SortOrder)
 {
-	FPlacementCategoryInfo CategoryInfo(                                       
-	FText::FromString(Category),                                               
-	FSlateIcon(FAppStyle::GetAppStyleSetName(), FName(SVG)),                                 
-	FName(Category),                                                               
-	Category,                                                          
-	SortOrder                                                                     
-	);                                                                               
-	CategoryInfo.ShortDisplayName = FText::FromString(DisplayName);	
-	IPlacementModeModule::Get().RegisterPlacementCategory(CategoryInfo);             
+#if WITH_EDITOR
+	if(GEngine)
+	{
+		if (FModuleManager::Get().IsModuleLoaded("PlacementModule"))
+		{
+			FPlacementCategoryInfo CategoryInfo(                                       
+				FText::FromString(Category),                                               
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), FName(SVG)),                                 
+				FName(Category),                                                               
+				Category,                                                          
+				SortOrder                                                                     
+				);                                                                               
+			CategoryInfo.ShortDisplayName = FText::FromString(DisplayName);	
+			IPlacementModeModule::Get().RegisterPlacementCategory(CategoryInfo);   
+		}
+		
+	}
+#endif
 }
 
 void UOmniEngineSubsystem::AddClassToPlacementPalette(FString Category, UClass* Class)
 {
 #if WITH_EDITOR
-	const FPlacementCategoryInfo* Info = IPlacementModeModule::Get().GetRegisteredPlacementCategory(FName(Category));
-	if(Info)
+	
+	if(GEngine)
 	{
-		IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShareable( new FPlaceableItem(nullptr, FAssetData(Class)) ));
+		if (FModuleManager::Get().IsModuleLoaded("PlacementModule"))
+		{
+			const FPlacementCategoryInfo* Info = IPlacementModeModule::Get().GetRegisteredPlacementCategory(FName(Category));
+			if(Info)
+			{
+				IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShareable( new FPlaceableItem(nullptr, FAssetData(Class)) ));
+			}
+		}
 	}
 	
 #endif
