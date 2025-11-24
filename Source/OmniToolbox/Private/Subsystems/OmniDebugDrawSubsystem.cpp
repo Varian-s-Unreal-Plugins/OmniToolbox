@@ -21,13 +21,6 @@ else\
 FMsg::Logf(__FILE__, __LINE__, UE_FNAME_TO_LOG_CATEGORY_NAME(CategoryName), DefaultVerbosity, (Format), __VA_ARGS__);\
 }
 
-void UOmniDebugDrawSubsystem::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-	
-	FilenameGetter = FVisualLogFilenameGetterDelegate::CreateUObject(this, &UOmniDebugDrawSubsystem::GetFilename);
-}
-
 void UOmniDebugDrawSubsystem::AddShape(FOmniDebugDrawCommand Command, FName Key)
 {
 	if(Key.IsNone())
@@ -218,9 +211,4 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 	{
 		ShapesToDraw.Remove(ShapeToRemove);
 	}
-}
-
-FString UOmniDebugDrawSubsystem::GetFilename()
-{
-	return "Hello-World";
 }

@@ -80,8 +80,6 @@ class OMNITOOLBOX_API UOmniDebugDrawSubsystem : public UTickableWorldSubsystem
 	
 public:
 	
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	
 	void AddShape(FOmniDebugDrawCommand Command, FName Key);
 	
 	TMap<FName, FOmniDebugDrawCommand> ShapesToDraw;
@@ -92,10 +90,6 @@ public:
 	}
 	
 	virtual void Tick(float DeltaTime) override;
-	
-	FVisualLogFilenameGetterDelegate FilenameGetter;
-	
-	FString GetFilename();
 	
 	
 private:
