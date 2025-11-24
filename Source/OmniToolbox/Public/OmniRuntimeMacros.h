@@ -10,6 +10,7 @@
 /**Trace with string label*/
 #define Omni_InsightsTrace_Str(Text) TRACE_CPUPROFILER_EVENT_SCOPE_STR(Text)
 #define Omni_InsightsTrace() TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__)
+#define Omni_InsightsTrace_Append(Text) TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("%hs ::Text"), __FUNCTION__)
 
 
 struct FOmniRunOnStartupHelper
@@ -123,3 +124,43 @@ Omni_OnPostEngineInit() \
 		OmniStyle->AddClassToPlacementPalette(Category, Class); \
 	} \
 }
+
+/**The console variable is nearly entirely copied from the open-source VoxelCore plugin.
+ * Full credit goes to them. I would have never figured out how to handle this by myself. */
+
+FORCEINLINE void OmniConsoleVariable_CallOnChanged() {}
+FORCEINLINE void OmniConsoleVariable_CallOnChanged(TFunction<void()> OnChanged) { OnChanged(); }
+FORCEINLINE void OmniConsoleVariable_CallOnChanged(TFunction<void()> OnChanged, TFunction<void()> Tick) { OnChanged(); }
+
+FORCEINLINE void OmniConsoleVariable_CallTick() {}
+FORCEINLINE void OmniConsoleVariable_CallTick(TFunction<void()> OnChanged) {}
+FORCEINLINE void OmniConsoleVariable_CallTick(TFunction<void()> OnChanged, TFunction<void()> Tick) { Tick(); }
+
+struct FOmniConsoleVariableHelper
+{
+	FOmniConsoleVariableHelper(
+		TFunction<void()> OnChanged,
+		TFunction<void()> Tick)
+	{}
+};
+
+#define Omni_ConsoleVariable(Api, Type, Name, Default, Command, Description, ...) \
+	Api Type Name = Default; \
+	static FAutoConsoleVariableRef CVar_ ## Name( \
+		TEXT(Command),  \
+		Name,  \
+		TEXT(Description)); \
+	\
+	static const FOmniConsoleVariableHelper PREPROCESSOR_JOIN(OmniConsoleVariableHelper, __COUNTER__)([] \
+	{ \
+		static Type LastValue = Default; \
+		if (LastValue != Name) \
+		{ \
+			LastValue = Name; \
+			OmniConsoleVariable_CallOnChanged(__VA_ARGS__); \
+		} \
+	}, \
+	[] \
+	{ \
+		OmniConsoleVariable_CallTick(__VA_ARGS__); \
+	});
