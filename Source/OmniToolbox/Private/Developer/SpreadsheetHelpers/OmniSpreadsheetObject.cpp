@@ -24,14 +24,7 @@ bool UOmniSpreadsheetObject::Initialize(const TArray<FString>& InHeaders, FStrin
 
 	const FString FileName = CustomFileName.IsEmpty() ? FString::Printf(TEXT("%s.html"), *Timestamp) : FString::Printf(TEXT("%s.html"), *CustomFileName);
 	FilePath = Directory / FileName;
-
-	if(!Save())
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to create HTML file at %s"), *FilePath);
-		return false;
-	}
-
-	UE_LOG(LogTemp, Log, TEXT("Created new HTML table: %s"), *FilePath);
+	
 	return true;
 }
 

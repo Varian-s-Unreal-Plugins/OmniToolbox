@@ -62,9 +62,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OmniToolbox|Editor", meta = (CallableWithoutWorldContext, DevelopmentOnly))
 	static void EnableVislogRecordingToFile(bool bEnabled);
 	
-	UFUNCTION(BlueprintCallable, Category = "OmniToolbox|Editor", meta = (CallableWithoutWorldContext, DevelopmentOnlyWorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
-	static void EnableVislogRecordingToCustomPath(UObject* WorldContext, bool bEnabled, FString CustomPath);
-	
 	UFUNCTION(Category = "OmniToolbox|Draw Debug", BlueprintCallable, meta = (DevelopmentOnly, WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject", AdvancedDisplay=7))
 	static void DrawAndLogCapsule(UObject* WorldContextObject, FVector Center, float HalfHeight, float Radius, FQuat Rotation, FString Text, FLinearColor Color = FLinearColor::White, 
 		FName LogCategory = TEXT("VisLogBP"), FName Key = "None", float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);

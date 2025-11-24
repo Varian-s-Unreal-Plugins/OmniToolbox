@@ -201,6 +201,19 @@ FString UOmniEditorLibrary::GetPluginNameForClass(UClass* Class)
 #endif
 }
 
+void UOmniEditorLibrary::EnableVislogRecordingToFile(bool bEnabled)
+{
+#if ENABLE_VISUAL_LOG
+	FVisualLogger::Get().SetIsRecordingToFile(bEnabled);
+	/**Oddly enough, setting SetIsRecordingToFile does NOT
+	 * stop the actual recording. Maybe a bug? */
+	if(bEnabled == false)
+	{
+		FVisualLogger::Get().SetIsRecording(false);
+	}
+#endif // ENABLE_VISUAL_LOG
+}
+
 void UOmniEditorLibrary::DrawAndLogCapsule(UObject* WorldContextObject, FVector Center, float HalfHeight, float Radius,
                                            FQuat Rotation, FString Text, FLinearColor Color, FName LogCategory, FName Key, float Lifetime,
                                            bool bAddToMessageLog, bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
