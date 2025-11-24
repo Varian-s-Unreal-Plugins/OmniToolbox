@@ -45,6 +45,7 @@ public class OmniToolbox : ModuleRules
                 "SlateCore", 
                 "GameplayTags",
                 "Projects",
+                
             }
         );
         
