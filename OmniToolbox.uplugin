@@ -47,7 +47,7 @@
 		},
 		{
 			"Name": "OmniToolboxVanguard",
-			"Type": "Runtime",
+			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
 				"Win64",
@@ -69,6 +69,10 @@
 		},
 		{
 			"Name": "GameFeatures",
+			"Enabled": true
+		},
+		{
+			"Name": "PropertyBindingUtils",
 			"Enabled": true
 		}
 	]

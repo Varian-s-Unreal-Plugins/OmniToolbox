@@ -5,6 +5,9 @@
 
 #include "OmniToolboxVanguard.h"
 #include "VanguardFunctionalTestSubsystem.h"
+#include "HAL/FileManager.h"
+#include "Misc/Paths.h"
+#include "VisualLogger/VisualLogger.h"
 #include "FunctionLibraries/OmniEditorLibrary.h"
 
 

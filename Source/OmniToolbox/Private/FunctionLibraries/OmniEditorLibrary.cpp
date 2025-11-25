@@ -10,6 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Subsystems/OmniDebugDrawSubsystem.h"
 #include "UObject/Stack.h"
+#include "VisualLogger/VisualLogger.h"
+#include "Engine/World.h"
 #if WITH_EDITOR
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Interfaces/IPluginManager.h"
@@ -143,28 +145,34 @@ void UOmniEditorLibrary::RaiseScriptError(const FString& Message)
 
 void UOmniEditorLibrary::AddInstanceComponent(AActor* Actor, UActorComponent* Component)
 {
+#if WITH_EDITOR
 	if(Actor && Component)
 	{
 		Actor->PreEditChange(nullptr);
 		Actor->AddInstanceComponent(Component);
 		Actor->PostEditChange();
 	}
+#endif
 }
 
 void UOmniEditorLibrary::SetComponentEditorOnly(UActorComponent* Component, bool NewEditorOnly)
 {
+#if WITH_EDITOR
 	if(Component)
 	{
 		Component->bIsEditorOnly = NewEditorOnly;
 	}
+#endif
 }
 
 void UOmniEditorLibrary::MakeComponentInvisibleInActorComponents(UActorComponent* Component)
 {
+#if WITH_EDITOR
 	if(Component)
 	{
 		Component->SetIsVisualizationComponent(true); 
 	}
+#endif
 }
 
 FString UOmniEditorLibrary::GetPluginNameForClass(UClass* Class)

@@ -9,7 +9,12 @@ public class OmniToolboxVanguard : ModuleRules
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
-                "Core", "OmniToolbox",
+                "Core", 
+                "OmniToolbox",
+                "FunctionalTesting",
+                "DeveloperSettings",
+                "UnrealEdMessages",
+                "AutomationController",
             }
         );
 
@@ -20,18 +25,16 @@ public class OmniToolboxVanguard : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "FunctionalTesting",
-                "DeveloperSettings",
-                "ApplicationCore"
+                
             }
         );
         
-        if (Target.bBuildEditor)
-        {
-            PrivateDependencyModuleNames.AddRange(new string[]
-            {
-                "UnrealEd", 
-            });
-        }
+        // if (Target.bBuildEditor)
+        // {
+        //     PrivateDependencyModuleNames.AddRange(new string[]
+        //     {
+        //         "UnrealEd", 
+        //     });
+        // }
     }
 }

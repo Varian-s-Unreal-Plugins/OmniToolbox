@@ -2,9 +2,10 @@
 
 
 #include "Subsystems/OmniDebugDrawSubsystem.h"
-
+#include "DrawDebugHelpers.h"
 #include "OmniRuntimeMacros.h"
-#include "VisualLogger/VisualLoggerKismetLibrary.h"
+#include "VisualLogger/VisualLogger.h"
+#include "Logging/MessageLog.h"
 
 Omni_ConsoleVariable(
 	OMNITOOLBOX_API, bool, DrawDebugShapes, 1,
@@ -93,8 +94,8 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 					DrawDebugBox(GetWorld(), Command.Location, Command.Extent, Command.Color.ToFColor(true),
 						false, Command.Lifetime, Command.DepthPriority, Command.Thickness);
 				}
-				#if ENABLE_VISUAL_LOG
 				FBox Box = FBox(Command.Location - Command.Extent, Command.Location + Command.Extent);
+				#if ENABLE_VISUAL_LOG
 				FVisualLogger::BoxLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
 					, Box, FMatrix::Identity, 
 					Command.Color.ToFColor(true), Command.Wireframe, TEXT("%s"), *Command.Text);
