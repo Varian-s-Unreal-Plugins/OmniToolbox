@@ -164,3 +164,28 @@ struct FOmniConsoleVariableHelper
 	{ \
 		OmniConsoleVariable_CallTick(__VA_ARGS__); \
 	});
+//
+// #define Omni_CONSOLE_COMMAND(Command, Description) \
+// 	static void OmniConsoleCommand(TOmniCounterDummy<__COUNTER__>, const TArray<FString>& Args); \
+// 	static FAutoConsoleCommand PREPROCESSOR_JOIN(OmniAutoCmd, __COUNTER__)( \
+// 	    TEXT(Command), \
+// 	    TEXT(Description), \
+// 		MakeLambdaDelegate([](const TArray<FString>& Args) \
+// 		{ \
+// 			static_assert(sizeof(Description) > 1, "Missing description"); \
+// 			OmniConsoleCommand(TOmniCounterDummy<__COUNTER__ - 2>(), Args); \
+// 		})); \
+// 	\
+// 	static void OmniConsoleCommand(TOmniCounterDummy<__COUNTER__ - 3>, const TArray<FString>& Args)
+//
+// #define Omni_CONSOLE_WORLD_COMMAND(Command, Description) \
+// 	static void OmniConsoleCommand(TOmniCounterDummy<__COUNTER__>, const TArray<FString>& Args, UWorld* World); \
+// 	static FAutoConsoleCommand PREPROCESSOR_JOIN(OmniAutoCmd, __COUNTER__)( \
+// 	    TEXT(Command), \
+// 	    TEXT(Description), \
+// 		MakeLambdaDelegate([](const TArray<FString>& Args, UWorld* World, FOutputDevice&) \
+// 		{ \
+// 			OmniConsoleCommand(TOmniCounterDummy<__COUNTER__ - 2>(), Args, World); \
+// 		})); \
+// 	\
+// 	static void OmniConsoleCommand(TOmniCounterDummy<__COUNTER__ - 3>, const TArray<FString>& Args, UWorld* World)

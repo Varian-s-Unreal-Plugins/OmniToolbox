@@ -58,7 +58,7 @@ void UOmniEngineSubsystem::RegisterPlacementPaletteCategory(FString Category, FS
 #if WITH_EDITOR
 	if(GEngine)
 	{
-		if (FModuleManager::Get().IsModuleLoaded("PlacementModule"))
+		if (FModuleManager::Get().IsModuleLoaded("PlacementMode"))
 		{
 			FPlacementCategoryInfo CategoryInfo(                                       
 				FText::FromString(Category),                                               
@@ -81,7 +81,7 @@ void UOmniEngineSubsystem::AddClassToPlacementPalette(FString Category, UClass* 
 	
 	if(GEngine)
 	{
-		if (FModuleManager::Get().IsModuleLoaded("PlacementModule"))
+		if (FModuleManager::Get().IsModuleLoaded("PlacementMode"))
 		{
 			const FPlacementCategoryInfo* Info = IPlacementModeModule::Get().GetRegisteredPlacementCategory(FName(Category));
 			if(Info)
