@@ -22,7 +22,7 @@ bool UOmniSpreadsheetObject::Initialize(const TArray<FString>& InHeaders, FStrin
 		Now.GetDay(), Now.GetMonth(), Now.GetYear(),
 		Now.GetHour(), Now.GetMinute(), Now.GetSecond());
 
-	const FString FileName = CustomFileName.IsEmpty() ? FString::Printf(TEXT("%s.html"), *Timestamp) : FString::Printf(TEXT("%s.html"), *CustomFileName);
+	FileName = CustomFileName.IsEmpty() ? FString::Printf(TEXT("%s.html"), *Timestamp) : FString::Printf(TEXT("%s.html"), *CustomFileName);
 	FilePath = Directory / FileName;
 	
 	return true;

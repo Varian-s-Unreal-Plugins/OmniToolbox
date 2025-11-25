@@ -51,6 +51,8 @@ public:
 	/** File path to the HTML file this object is managing */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Omni Spreadsheet Object")
 	FString FilePath;
+	
+	FString FileName;
 
 	UFUNCTION(BlueprintCallable, Category = "Omni Spreadsheet Object")
 	bool Save();
