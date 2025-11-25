@@ -25,7 +25,8 @@ public class OmniToolboxVanguard : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                
+                "TraceUtilities",
+                "UnrealEd"
             }
         );
         

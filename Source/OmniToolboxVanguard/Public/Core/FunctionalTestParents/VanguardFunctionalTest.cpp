@@ -8,6 +8,7 @@
 #include "HAL/FileManager.h"
 #include "Misc/Paths.h"
 #include "VisualLogger/VisualLogger.h"
+#include "TraceUtilLibrary.h"
 #include "FunctionLibraries/OmniEditorLibrary.h"
 
 
@@ -60,10 +61,12 @@ void AVanguardFunctionalTest::WriteSpecificResult(EVanguardExcelHeader Header, F
 		if(LastExpectedResult != ResultText)
 		{
 			/**Results don't match, report the issue.*/
-			UOmniEditorLibrary::RaiseScriptError(FString("Result " + ResultText + " does not match expected result " + LastExpectedResult));
+			FString ErrorMessage = FString("Result: " + ResultText + " - does not match expected result: " + LastExpectedResult);
+			UOmniEditorLibrary::RaiseScriptError(ErrorMessage);
 			SpreadsheetObject->ColorCell(Row, ColumnIndex, FLinearColor::Red, false);
 			SpreadsheetObject->ColorCell(Row, ExpectedResultColumnIndex, FLinearColor::Red, false);
 			ContainsErrorInSpreadsheet = true;
+			UTraceUtilLibrary::TraceScreenshot(ErrorMessage, false);
 		}
 		else
 		{
@@ -174,14 +177,16 @@ void AVanguardFunctionalTest::FinishTest(EFunctionalTestResult TestResult, const
 				}
 			}
 		
-			if(GenerateSpreadsheets)
-			{
-				SpreadsheetObject->Save();
-			}
-		
 			if(ContainsErrorInSpreadsheet)
 			{
 				TestResult = EFunctionalTestResult::Failed;
+			}
+			
+			if(GenerateSpreadsheets)
+			{
+				SpreadsheetObject->FilePath.RemoveFromEnd(".html");
+				SpreadsheetObject->FilePath += FString("_") + LexToString(TestResult) + ".html";
+				SpreadsheetObject->Save();
 			}
 		}
 			

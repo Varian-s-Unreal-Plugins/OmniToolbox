@@ -7,9 +7,7 @@
 #include "OmniToolboxVanguard.h"
 #include "VanguardFunctionalTest.h"
 #include "VanguardTestingSettings.h"
-// #if WITH_EDITOR
-// #include "Settings/EditorExperimentalSettings.h"
-// #endif
+#include "Settings/EditorExperimentalSettings.h"
 
 Omni_ConsoleVariable(OMNITOOLBOXVANGUARD_API, bool, GenerateSpreadsheets, true,
                      "OmniToolbox.Vanguard.GenerateSpreadsheets", "Allows testers to generate a spreadsheet")
@@ -25,18 +23,16 @@ void UVanguardFunctionalTestSubsystem::Initialize(FSubsystemCollectionBase& Coll
 	
 	IsRunning = true;
 	
-// #if WITH_EDITOR
-// 	/**We must make sure that bBreakOnExceptions is false while running tests,
-// 	 * because this is supposed to be automated and ideally, ran on some other
-// 	 * machine and you do not have to babysit it.
-// 	 * If this setting is enabled, you must manually press resume.
-// 	 * This can mean that if you're running a lot of tests overnight,
-// 	 * you might not wake up to all the tests having completed because
-// 	 * one test had an error. */
-// 	UEditorExperimentalSettings* ExperimentalSettings = GetMutableDefault<UEditorExperimentalSettings>();
-// 	OriginalBreakOnBlueprintExceptionSetting = ExperimentalSettings->bBreakOnExceptions;
-// 	ExperimentalSettings->bBreakOnExceptions = false;
-// #endif
+	/**We must make sure that bBreakOnExceptions is false while running tests,
+	 * because this is supposed to be automated and ideally, ran on some other
+	 * machine and you do not have to babysit it.
+	 * If this setting is enabled, you must manually press resume.
+	 * This can mean that if you're running a lot of tests overnight,
+	 * you might not wake up to all the tests having completed because
+	 * one test had an error. */
+	UEditorExperimentalSettings* ExperimentalSettings = GetMutableDefault<UEditorExperimentalSettings>();
+	OriginalBreakOnBlueprintExceptionSetting = ExperimentalSettings->bBreakOnExceptions;
+	ExperimentalSettings->bBreakOnExceptions = false;
 	
 	//Timestamped filename
 	const FDateTime Now = FDateTime::Now();
@@ -89,11 +85,9 @@ void UVanguardFunctionalTestSubsystem::Deinitialize()
 		PerformanceSpreadsheet->Save();
 	}
 	
-// #if WITH_EDITOR
-// 	/**Restore the setting that was being used*/
-// 	UEditorExperimentalSettings* ExperimentalSettings = GetMutableDefault<UEditorExperimentalSettings>();
-// 	ExperimentalSettings->bBreakOnExceptions = OriginalBreakOnBlueprintExceptionSetting;
-// #endif
+	/**Restore the setting that was being used*/
+	UEditorExperimentalSettings* ExperimentalSettings = GetMutableDefault<UEditorExperimentalSettings>();
+	ExperimentalSettings->bBreakOnExceptions = OriginalBreakOnBlueprintExceptionSetting;
 	
 	Super::Deinitialize();
 }
