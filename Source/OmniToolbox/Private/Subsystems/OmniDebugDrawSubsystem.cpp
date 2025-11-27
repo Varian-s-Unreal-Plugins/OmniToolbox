@@ -73,12 +73,12 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				if(DrawDebugShapes)
 				{
 					DrawDebugLine(GetWorld(), Command.Location, Command.End, Command.Color.ToFColor(true),
-						false, Command.Lifetime, Command.DepthPriority, Command.Thickness);
+						false, 0, Command.DepthPriority, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
 				/**There is no line for the visual logger. Fake it with a really thin capsule*/
 				FVisualLogger::CapsuleLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
-					, Command.Location, (Command.End - Command.Location).Size(), Command.Thickness, FQuat::MakeFromRotator(FRotationMatrix::MakeFromZ(Command.End - Command.Location).Rotator()), Command.Color.ToFColor(true), Command.Wireframe, TEXT("%s"), *Command.Text);
+					, Command.Location, (Command.End - Command.Location).Size() / 2, Command.Thickness, FQuat::MakeFromRotator(FRotationMatrix::MakeFromZ(Command.End - Command.Location).Rotator()), Command.Color.ToFColor(true), Command.Wireframe, TEXT("%s"), *Command.Text);
 				#endif
 				if(Command.AddMessageToLog)
 				{
@@ -112,7 +112,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				if(DrawDebugShapes)
 				{
 					DrawDebugSphere(GetWorld(), Command.Location, Command.Radius, 16, Command.Color.ToFColor(true),
-						false, Command.Lifetime, Command.DepthPriority, Command.Thickness);
+						false, 0, Command.DepthPriority, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
 				FVisualLogger::SphereLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
@@ -131,7 +131,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				{
 					/**We have to offset the center, because Vislog capsule does not use the center. And I think this is far more useful*/
 					DrawDebugCapsule(GetWorld(), FVector(Command.Location.X, Command.Location.Y, Command.Location.Z + Command.HalfHeight), Command.HalfHeight, Command.Radius, Command.Rotation, Command.Color.ToFColor(true),
-						false, Command.Lifetime, 0, Command.Thickness);
+						false, 0, 0, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
 				FVisualLogger::CapsuleLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
@@ -165,7 +165,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 			{
 				if(DrawDebugShapes)
 				{
-					DrawDebugString(GetWorld(), Command.Location, Command.Text, nullptr, Command.Color.ToFColor(true), Command.Lifetime, false, Command.Thickness);
+					DrawDebugString(GetWorld(), Command.Location, Command.Text, nullptr, Command.Color.ToFColor(true), 0, false, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
 				/**There is no "Log text" in a way that draws text in the world like we have for the other shapes.
@@ -186,7 +186,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				if(DrawDebugShapes)
 				{
 					DrawDebugCone(GetWorld(), Command.Location, Command.Direction, Command.Length, FMath::DegreesToRadians(Command.AngleWidth), FMath::DegreesToRadians(Command.AngleHeight), 
-					16, Command.Color.ToFColor(true), false, Command.Lifetime, Command.DepthPriority, Command.Thickness);
+					16, Command.Color.ToFColor(true), false, 0, Command.DepthPriority, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
 				FVisualLogger::ConeLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log

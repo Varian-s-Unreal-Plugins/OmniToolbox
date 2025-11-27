@@ -223,191 +223,216 @@ void UOmniEditorLibrary::EnableVislogRecordingToFile(bool bEnabled)
 }
 
 void UOmniEditorLibrary::DrawAndLogCapsule(UObject* WorldContextObject, FVector Center, float HalfHeight, float Radius,
-                                           FQuat Rotation, FString Text, FLinearColor Color, FName LogCategory, FName Key, float Lifetime,
+                                           FQuat Rotation, FString Key, FString Text, FLinearColor Color, FName LogCategory, float Lifetime,
                                            bool bAddToMessageLog, bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Key, Thickness, Lifetime, Center, Rotation, HalfHeight, Radius]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Capsule;
-		DrawCommand.Location = Center;
-		DrawCommand.Rotation = Rotation;
-		DrawCommand.HalfHeight = HalfHeight;
-		DrawCommand.Radius = Radius;
-		DrawCommand.Thickness = Thickness;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Capsule;
+			DrawCommand.Location = Center;
+			DrawCommand.Rotation = Rotation;
+			DrawCommand.HalfHeight = HalfHeight;
+			DrawCommand.Radius = Radius;
+			DrawCommand.Thickness = Thickness;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
 }
 
-void UOmniEditorLibrary::DrawAndLogLine(UObject* WorldContextObject, FVector Start, FVector End, FString Text,
-	FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog, bool bWireframe,
+void UOmniEditorLibrary::DrawAndLogLine(UObject* WorldContextObject, FVector Start, FVector End, FString Key, FString Text,
+	FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog, bool bWireframe,
 	EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Key, Thickness, Lifetime, Start, End]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Line;
-		DrawCommand.Location = Start;
-		DrawCommand.End = End;
-		DrawCommand.Thickness = Thickness;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Line;
+			DrawCommand.Location = Start;
+			DrawCommand.End = End;
+			DrawCommand.Thickness = Thickness;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
 }
 
-void UOmniEditorLibrary::DrawAndLogCone(UObject* WorldContextObject, FVector Start, FVector Direction, float Length, float Angle,
-	FString Text, FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog,
-	bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
+void UOmniEditorLibrary::DrawAndLogCone(UObject* WorldContextObject, FVector Start, FVector Direction, float Length, float Angle, FString Key,
+                                        FString Text, FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog,
+                                        bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Key, Thickness, Lifetime, Start, Direction, Length, Angle]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Cone;
-		DrawCommand.Location = Start;
-		DrawCommand.Direction = Direction;
-		DrawCommand.Length = Length;
-		DrawCommand.AngleHeight = Angle;
-		DrawCommand.AngleWidth = Angle;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.Thickness = Thickness;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Cone;
+			DrawCommand.Location = Start;
+			DrawCommand.Direction = Direction;
+			DrawCommand.Length = Length;
+			DrawCommand.AngleHeight = Angle;
+			DrawCommand.AngleWidth = Angle;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.Thickness = Thickness;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}	
+	});
 }
 
-void UOmniEditorLibrary::DrawAndLogCircle(UObject* WorldContextObject, FVector Center, FVector UpAxis, float Radius,
-	FString Text, FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog,
+void UOmniEditorLibrary::DrawAndLogCircle(UObject* WorldContextObject, FVector Center, FVector UpAxis, float Radius, FString Key,
+	FString Text, FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog,
 	bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Key, Thickness, Center, UpAxis, Radius, Lifetime]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Circle;
-		DrawCommand.Location = Center;
-		DrawCommand.Rotation = FQuat(UpAxis.Rotation());
-		DrawCommand.Radius = Radius;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawCommand.Thickness = Thickness;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Circle;
+			DrawCommand.Location = Center;
+			DrawCommand.Rotation = FQuat(UpAxis.Rotation());
+			DrawCommand.Radius = Radius;
+			DrawCommand.Color = Color;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.Text = Text;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawCommand.Thickness = Thickness;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
 }
 
 void UOmniEditorLibrary::DrawAndLogBox(UObject* WorldContextObject, FVector Center, FVector Extent, FString Text,
 	FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog, bool bWireframe,
 	EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Lifetime, Key, Thickness, Center, Extent]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Box;
-		DrawCommand.Location = Center;
-		DrawCommand.Extent = Extent;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawCommand.Thickness = Thickness;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Box;
+			DrawCommand.Location = Center;
+			DrawCommand.Extent = Extent;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawCommand.Thickness = Thickness;
+			DrawSubsystem->AddShape(DrawCommand, Key);
+		}
+	});
 }
 
-void UOmniEditorLibrary::DrawAndLogSphere(UObject* WorldContextObject, FVector Center, float Radius, FString Text,
-	FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog, bool bWireframe,
+void UOmniEditorLibrary::DrawAndLogSphere(UObject* WorldContextObject, FVector Center, float Radius, FString Key, FString Text,
+	FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog, bool bWireframe,
 	EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Center, Radius, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Thickness, Key, Lifetime]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Sphere;
-		DrawCommand.Location = Center;
-		DrawCommand.Radius = Radius;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawCommand.Thickness = Thickness;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Sphere;
+			DrawCommand.Location = Center;
+			DrawCommand.Radius = Radius;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawCommand.Thickness = Thickness;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
 }
 
-void UOmniEditorLibrary::DrawAndLogArrow(UObject* WorldContextObject, FVector Start, FVector End, float ArrowSize,
-	FString Text, FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog,
+void UOmniEditorLibrary::DrawAndLogArrow(UObject* WorldContextObject, FVector Start, FVector End, float ArrowSize, FString Key,
+	FString Text, FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog,
 	bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Thickness, Key, Start, End, ArrowSize, Lifetime]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Arrow;
-		DrawCommand.Location = Start;
-		DrawCommand.End = End;
-		DrawCommand.ArrowSize = ArrowSize;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawCommand.Thickness = Thickness;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Arrow;
+			DrawCommand.Location = Start;
+			DrawCommand.End = End;
+			DrawCommand.ArrowSize = ArrowSize;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawCommand.Thickness = Thickness;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
+	
 }
 
-void UOmniEditorLibrary::DrawAndLogText(UObject* WorldContextObject, FVector Location, FString Text, FLinearColor Color,
-	FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog, bool bWireframe,
+void UOmniEditorLibrary::DrawAndLogText(UObject* WorldContextObject, FVector Location, FString Text, FString Key, FLinearColor Color,
+	FName LogCategory, float Lifetime, bool bAddToMessageLog, bool bWireframe,
 	EDrawDebugSceneDepthPriorityGroup DepthPriority, float FontSize)
 {
-	if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Lifetime, FontSize, Key, Location]()
 	{
-		FOmniDebugDrawCommand DrawCommand;
-		DrawCommand.Owner = WorldContextObject;
-		DrawCommand.Type = EOmniDebugDrawType::Text;
-		DrawCommand.Location = Location;
-		DrawCommand.Color = Color;
-		DrawCommand.Text = Text;
-		DrawCommand.Lifetime = Key.IsNone() ? Lifetime : 0.0f;
-		DrawCommand.AddMessageToLog = bAddToMessageLog;
-		DrawCommand.Wireframe = bWireframe;
-		DrawCommand.LogCategory = LogCategory;
-		DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
-		DrawCommand.Thickness = FontSize;
-		DrawSubsystem->AddShape(DrawCommand, Key);
-	}
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::Text;
+			DrawCommand.Location = Location;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawCommand.Thickness = FontSize;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
 }
