@@ -79,8 +79,8 @@ public:
 		float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);
 	
 	UFUNCTION(Category = "OmniToolbox|Draw Debug", BlueprintCallable, meta = (DevelopmentOnly, WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject", AdvancedDisplay=6))
-	static void DrawAndLogBox(UObject* WorldContextObject, FVector Center, FVector Extent, FString Text, FLinearColor Color = FLinearColor::White, FName LogCategory = TEXT("VisLog"), 
-		FName Key = "None", float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);
+	static void DrawAndLogBox(UObject* WorldContextObject, FVector Center, FVector Extent, FString Key, FString Text, FLinearColor Color = FLinearColor::White, FName LogCategory = TEXT("VisLog"), 
+		float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);
 	
 	UFUNCTION(Category = "OmniToolbox|Draw Debug", BlueprintCallable, meta = (DevelopmentOnly, WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject", AdvancedDisplay=6))
 	static void DrawAndLogSphere(UObject* WorldContextObject, FVector Center, float Radius, FString Key = "", FString Text = "", FLinearColor Color = FLinearColor::White, FName LogCategory = TEXT("VisLog"), 

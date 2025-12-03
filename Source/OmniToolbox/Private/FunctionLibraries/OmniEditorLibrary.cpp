@@ -332,8 +332,8 @@ void UOmniEditorLibrary::DrawAndLogCircle(UObject* WorldContextObject, FVector C
 	});
 }
 
-void UOmniEditorLibrary::DrawAndLogBox(UObject* WorldContextObject, FVector Center, FVector Extent, FString Text,
-	FLinearColor Color, FName LogCategory, FName Key, float Lifetime, bool bAddToMessageLog, bool bWireframe,
+void UOmniEditorLibrary::DrawAndLogBox(UObject* WorldContextObject, FVector Center, FVector Extent, FString Key, FString Text,
+	FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog, bool bWireframe,
 	EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
 	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Lifetime, Key, Thickness, Center, Extent]()
@@ -353,7 +353,7 @@ void UOmniEditorLibrary::DrawAndLogBox(UObject* WorldContextObject, FVector Cent
 			DrawCommand.LogCategory = LogCategory;
 			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
 			DrawCommand.Thickness = Thickness;
-			DrawSubsystem->AddShape(DrawCommand, Key);
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
 		}
 	});
 }
