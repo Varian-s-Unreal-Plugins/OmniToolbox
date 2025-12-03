@@ -5,16 +5,15 @@ public class OmniToolboxVanguard : ModuleRules
     public OmniToolboxVanguard(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        PrecompileForTargets = PrecompileTargetsType.Any;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
                 "Core", 
                 "OmniToolbox",
-                "FunctionalTesting",
                 "DeveloperSettings",
-                "UnrealEdMessages",
-                "AutomationController",
+                // "AutomationController",
             }
         );
 
@@ -26,16 +25,29 @@ public class OmniToolboxVanguard : ModuleRules
                 "Slate",
                 "SlateCore",
                 "TraceUtilities",
-                "UnrealEd"
             }
         );
+
+        if(Target.bBuildDeveloperTools)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+            {
+                "FunctionalTesting", 
+            });
+            
+            PublicDefinitions.Add("FunctionalTestingEnabled=1");
+        }
+        else
+        {
+            PublicDefinitions.Add("FunctionalTestingEnabled=0");
+        }
         
-        // if (Target.bBuildEditor)
-        // {
-        //     PrivateDependencyModuleNames.AddRange(new string[]
-        //     {
-        //         "UnrealEd", 
-        //     });
-        // }
+        if(Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+            {
+                "UnrealEd", 
+            });
+        }
     }
 }

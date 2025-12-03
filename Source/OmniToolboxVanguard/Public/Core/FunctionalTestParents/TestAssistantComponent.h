@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FunctionalTest.h"
-#include "OmniRuntimeMacros.h"
+#include "Components/ActorComponent.h"
 #include "Developer/SpreadsheetHelpers/OmniSpreadsheetObject.h"
-#include "VanguardFunctionalTest.generated.h"
+#include "TestAssistantComponent.generated.h"
 
 UENUM(BlueprintType)
 enum EVanguardExcelHeader : uint8
@@ -15,13 +14,28 @@ enum EVanguardExcelHeader : uint8
 	ActualResult
 };
 
-/**OmniToolbox's parent for all functional tests. */
-UCLASS(Abstract)
-class OMNITOOLBOXVANGUARD_API AVanguardFunctionalTest : public AFunctionalTest
+enum EVanguardExcelHeader : uint8;
+/**This component is designed to go on functional test actors
+ * and provide them with utilities to improve automation testing. */
+UCLASS(ClassGroup=(Vanguard), meta=(BlueprintSpawnableComponent))
+class OMNITOOLBOXVANGUARD_API UTestAssistantComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	// Sets default values for this component's properties
+	UTestAssistantComponent();
+	
+	/**Because ObservationPoint is inaccessible (Epic sure love their protected/private...
+	 * We can only find out if the test does NOT have an observation point by checking
+	 * if it has moved from its original location. */
+	FVector BeginPlayLocation;
+	
+	/**If there's no observation point assigned, we will look for
+	 * any actor with the tag "DefaultCamera" and assign that
+	 * as our observation point */
+	UPROPERTY(Category = "Functional Testing", BlueprintReadOnly, EditAnywhere)
+	bool UseDefaultCameraIfNoObservationPointIsSet = true;
 	
 	UPROPERTY(Category = "Functional Testing", BlueprintReadWrite)
 	TObjectPtr<UOmniSpreadsheetObject> SpreadsheetObject = nullptr;
@@ -29,6 +43,19 @@ public:
 	/**When the test is started, should we record a Vislog session?*/
 	UPROPERTY(Category = "Functional Testing", BlueprintReadOnly, EditAnywhere)
 	bool AutomaticallyRecordVislog = false;
+	
+	/**When the test is preparing to start, should we start an Unreal Insights trace?*/
+	UPROPERTY(Category = "Functional Testing", BlueprintReadOnly, EditAnywhere)
+	bool AutomaticallyStartInsightsTrace = false;
+	
+	/**When we are preparing the test (before @StartTest is called)
+	 * we will execute these console commands */
+	UPROPERTY(Category = "Functional Testing", BlueprintReadOnly, EditAnywhere)
+	TArray<FString> ConsoleCommandsToExecuteOnPrepareTest;
+	
+	/**When we are ending the test, we will execute these console commands */
+	UPROPERTY(Category = "Functional Testing", BlueprintReadOnly, EditAnywhere)
+	TArray<FString> ConsoleCommandsToExecuteOnEndTest;
 	
 	FString CurrentTestLog;
 	
@@ -72,7 +99,7 @@ public:
 	 * made by that effect. So you'd call this function again
 	 * and label it as "Target Health changed" */
 	UFUNCTION(Category = "Vanguard Functional Test", BlueprintCallable)
-	void StartNewTest(FString InTestName);
+	void StartNewSpreadsheetRow(FString NewSpreadsheetRow);
 	
 	UFUNCTION(Category = "Vanguard Functional Test", BlueprintCallable, BlueprintPure)
 	int32 GetRowIndex(bool IncludeOffset) const
@@ -92,11 +119,23 @@ public:
 	int32 HitchesDetected = 0;
 	
 	bool ContainsErrorInSpreadsheet = false;
-
-	virtual void PrepareTest() override;
-	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
+	
+	TWeakObjectPtr<APlayerController> TargetPC = nullptr;
 
 private:
 	int32 RowIndex = 0;
 	int32 RowOffset = 0;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+	
+	UFUNCTION()
+	virtual void OnTestPrepare();
+	
+	UFUNCTION()
+	virtual void OnTestStarted();
+	
+	UFUNCTION()
+	virtual void OnTestFinished();
 };

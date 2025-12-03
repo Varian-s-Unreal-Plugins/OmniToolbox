@@ -8,6 +8,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "VanguardFunctionalTestSubsystem.generated.h"
 
+class UTestAssistantComponent;
 enum class EFunctionalTestResult : uint8;
 class AVanguardFunctionalTest;
 
@@ -70,7 +71,7 @@ public:
 	 * This is modified inside the @Initialize function */
 	FString FilepathToUse = VanguardSpreadSheet::Directory;
 	
-	TWeakObjectPtr<AVanguardFunctionalTest> CurrentTest = nullptr;
+	TWeakObjectPtr<UTestAssistantComponent> CurrentTest = nullptr;
 	
 	bool OriginalBreakOnBlueprintExceptionSetting = false;
 	bool IsRunning = false;
@@ -78,14 +79,13 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
-	void TestBeginning(AVanguardFunctionalTest* Test);
-	void TestEnding(AVanguardFunctionalTest* Test, EFunctionalTestResult FinishState);
+	void TestBeginning(UTestAssistantComponent* Test);
+	void TestEnding(UTestAssistantComponent* Test, EFunctionalTestResult FinishState);
 
 	virtual TStatId GetStatId() const override { return TStatId(); }
 	
 	TArray<float> Frames;
 	
-	virtual void Tick(float DeltaTime) override;
-	
 	float LastDeltaTime = 0;
+	virtual void Tick(float DeltaTime) override;
 };

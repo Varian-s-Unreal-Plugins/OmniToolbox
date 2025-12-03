@@ -5,17 +5,25 @@
 
 #include "OmniRuntimeMacros.h"
 #include "OmniToolboxVanguard.h"
-#include "VanguardFunctionalTest.h"
+#include "TestAssistantComponent.h"
+#if FunctionalTestingEnabled
+#include "FunctionalTest.h"
+#endif
 #include "VanguardTestingSettings.h"
+#if WITH_EDITOR
 #include "Settings/EditorExperimentalSettings.h"
+#endif
 
-Omni_ConsoleVariable(OMNITOOLBOXVANGUARD_API, bool, GenerateSpreadsheets, true,
+
+Omni_ConsoleVariable(OMNITOOLBOXVANGUARD_API, bool, GenerateSpreadsheets, false,
                      "OmniToolbox.Vanguard.GenerateSpreadsheets", "Allows testers to generate a spreadsheet")
+
+Omni_ConsoleVariable(OMNITOOLBOXVANGUARD_API, bool, OverrideIsAutomationTesting, false,
+					 "OmniToolbox.Vanguard.OverrideIsAutomationTesting", "Override the GIsAutomationTesting checks to allow Vanguard to function without")
 
 void UVanguardFunctionalTestSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	
-	if(GIsAutomationTesting == false)
+	if(GIsAutomationTesting == false && OverrideIsAutomationTesting == false)
 	{
 		Super::Initialize(Collection);
 		return;
@@ -23,6 +31,7 @@ void UVanguardFunctionalTestSubsystem::Initialize(FSubsystemCollectionBase& Coll
 	
 	IsRunning = true;
 	
+#if WITH_EDITOR
 	/**We must make sure that bBreakOnExceptions is false while running tests,
 	 * because this is supposed to be automated and ideally, ran on some other
 	 * machine and you do not have to babysit it.
@@ -33,6 +42,7 @@ void UVanguardFunctionalTestSubsystem::Initialize(FSubsystemCollectionBase& Coll
 	UEditorExperimentalSettings* ExperimentalSettings = GetMutableDefault<UEditorExperimentalSettings>();
 	OriginalBreakOnBlueprintExceptionSetting = ExperimentalSettings->bBreakOnExceptions;
 	ExperimentalSettings->bBreakOnExceptions = false;
+#endif
 	
 	//Timestamped filename
 	const FDateTime Now = FDateTime::Now();
@@ -85,25 +95,31 @@ void UVanguardFunctionalTestSubsystem::Deinitialize()
 		PerformanceSpreadsheet->Save();
 	}
 	
+#if WITH_EDITOR
 	/**Restore the setting that was being used*/
 	UEditorExperimentalSettings* ExperimentalSettings = GetMutableDefault<UEditorExperimentalSettings>();
 	ExperimentalSettings->bBreakOnExceptions = OriginalBreakOnBlueprintExceptionSetting;
+#endif
 	
 	Super::Deinitialize();
 }
 
-void UVanguardFunctionalTestSubsystem::TestBeginning(AVanguardFunctionalTest* Test)
+void UVanguardFunctionalTestSubsystem::TestBeginning(UTestAssistantComponent* Test)
 {
+#if FunctionalTestingEnabled
 	CurrentTest = Test;
 	
 	if(PerformanceSpreadsheet)
 	{
-		CurrentTestRow = PerformanceSpreadsheet->AddRowByName(Test->TestLabel, false);
+		AFunctionalTest* FunctionalTest = Cast<AFunctionalTest>(Test->GetOwner());
+		CurrentTestRow = PerformanceSpreadsheet->AddRowByName(FunctionalTest->TestLabel, false);
 	}
+#endif
 }
 
-void UVanguardFunctionalTestSubsystem::TestEnding(AVanguardFunctionalTest* Test, EFunctionalTestResult FinishState)
+void UVanguardFunctionalTestSubsystem::TestEnding(UTestAssistantComponent* Test, EFunctionalTestResult FinishState)
 {
+#if FunctionalTestingEnabled
 	if(PerformanceSpreadsheet == nullptr)
 	{
 		CurrentTest = nullptr;
@@ -136,6 +152,7 @@ void UVanguardFunctionalTestSubsystem::TestEnding(AVanguardFunctionalTest* Test,
 	
 	CurrentTest = nullptr;
 	Frames.Empty();
+#endif
 }
 
 void UVanguardFunctionalTestSubsystem::Tick(float DeltaTime)
@@ -148,13 +165,16 @@ void UVanguardFunctionalTestSubsystem::Tick(float DeltaTime)
 	
 	const UVanguardTestingSettings* Settings = GetDefault<UVanguardTestingSettings>();
 	
-	if(DeltaTime > (1 / Settings->HitchDeltaThreshold) && PerformanceSpreadsheet && CurrentTest.IsValid())
+	float FrameDifference = DeltaTime - LastDeltaTime;
+	if(FrameDifference > Settings->HitchDeltaThreshold && PerformanceSpreadsheet && CurrentTest.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Hitch detected in the test. DeltaTime: %f"), DeltaTime);
 		CurrentTest.Get()->HitchesDetected++;
 		int32 HitchesColumn = PerformanceSpreadsheet->GetColumnIndexByHeader("Hitches");
 		PerformanceSpreadsheet->EditCell(GetRow(), HitchesColumn, FString::FromInt(CurrentTest.Get()->HitchesDetected));
 	}
+	
+	LastDeltaTime = DeltaTime;
 	
 	Frames.Add(DeltaTime);
 	
