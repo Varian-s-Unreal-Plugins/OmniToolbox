@@ -6,6 +6,7 @@
 #include "OmniRuntimeMacros.h"
 #include "OmniToolboxVanguard.h"
 #include "TraceUtilLibrary.h"
+#include "Camera/CameraActor.h"
 #include "Core/FunctionalTestParents/VanguardFunctionalTestSubsystem.h"
 #include "Engine/DebugCameraController.h"
 #include "FunctionLibraries/OmniEditorLibrary.h"
@@ -198,6 +199,31 @@ void UTestAssistantComponent::OnTestPrepare()
 		Subsystem->TestBeginning(this);
 	}
 	
+	bool LocationChanged = false;
+	
+	AActor* TargetObservationPoint = nullptr;
+	
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("DefaultCamera"), OutActors);
+	if(OutActors.IsValidIndex(0))
+	{
+		TargetObservationPoint = OutActors[0];
+	}
+	
+	TArray<AActor*> AttachedActors;
+	GetOwner()->GetAttachedActors(AttachedActors);
+	if(AttachedActors.IsValidIndex(0))
+	{
+		for(auto& Actor : AttachedActors)
+		{
+			if(Actor && Cast<ACameraActor>(Actor))
+			{
+				TargetObservationPoint = Actor;
+				break;
+			}
+		}
+	}
+	
 	if(UseDefaultCameraIfNoObservationPointIsSet)
 	{
 		if(TargetPC.IsValid())
@@ -206,21 +232,18 @@ void UTestAssistantComponent::OnTestPrepare()
 			{
 				/**The test is still in the same location as it was on BeginPlay, meaning the observation point
 				 * is most likely not set. Find a default camera and move the player controller there. */
-				TArray<AActor*> OutActors;
-				UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("DefaultCamera"), OutActors);
-				if(OutActors.IsValidIndex(0))
+				
+				
+				if(TargetPC.IsValid())
 				{
-					if(TargetPC.IsValid())
+					if (TargetPC->GetPawn())
 					{
-						if (TargetPC->GetPawn())
-						{
-							TargetPC->GetPawn()->TeleportTo(OutActors[0]->GetActorLocation(), OutActors[0]->GetActorRotation(), /*bIsATest=*/false, /*bNoCheck=*/true);
-							TargetPC->SetControlRotation(OutActors[0]->GetActorRotation());
-						}
-						else
-						{
-							TargetPC->SetViewTarget(OutActors[0]);
-						}
+						TargetPC->GetPawn()->TeleportTo(TargetObservationPoint->GetActorLocation(), TargetObservationPoint->GetActorRotation(), /*bIsATest=*/false, /*bNoCheck=*/true);
+						TargetPC->SetControlRotation(TargetObservationPoint->GetActorRotation());
+					}
+					else
+					{
+						TargetPC->SetViewTarget(TargetObservationPoint);
 					}
 				}
 			}
