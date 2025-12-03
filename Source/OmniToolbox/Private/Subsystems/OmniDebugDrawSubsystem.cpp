@@ -53,7 +53,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				if(DrawDebugShapes)
 				{
 					DrawDebugCircle(GetWorld(), Command.Location, Command.Radius, 16, Command.Color.ToFColor(true),
-						false, Command.Lifetime, Command.DepthPriority, Command.Thickness, Command.Rotation.GetAxisY(), Command.Rotation.GetAxisZ(), false);
+						false, 0, Command.DepthPriority, Command.Thickness, Command.Rotation.GetAxisY(), Command.Rotation.GetAxisZ(), false);
 				}
 				#if ENABLE_VISUAL_LOG
 				FVisualLogger::DiscLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
@@ -92,7 +92,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				if(DrawDebugShapes)
 				{
 					DrawDebugBox(GetWorld(), Command.Location, Command.Extent, Command.Color.ToFColor(true),
-						false, Command.Lifetime, Command.DepthPriority, Command.Thickness);
+						false, 0, Command.DepthPriority, Command.Thickness);
 				}
 				FBox Box = FBox(Command.Location - Command.Extent, Command.Location + Command.Extent);
 				#if ENABLE_VISUAL_LOG
@@ -148,7 +148,7 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 			{
 				if(DrawDebugShapes)
 				{
-					DrawDebugDirectionalArrow(GetWorld(), Command.Location, Command.End, Command.ArrowSize, Command.Color.ToFColor(true), false, Command.Lifetime, Command.DepthPriority, Command.Thickness);
+					DrawDebugDirectionalArrow(GetWorld(), Command.Location, Command.End, Command.ArrowSize, Command.Color.ToFColor(true), false, 0, Command.DepthPriority, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
 				FVisualLogger::ArrowLineLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log,
