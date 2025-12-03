@@ -329,6 +329,7 @@ void UTestAssistantComponent::OnTestFinished()
 			Omni_InsightsTrace_Append("ValidateSpreadsheet")
 			/**Check for any empty ExpectedResult rows*/
 			int32 ExpectedResultColumn = SpreadsheetObject->GetColumnIndexByHeader(VanguardSpreadSheet::TestHeaders::ExpectedResult);
+			int32 ActualResultColumn = SpreadsheetObject->GetColumnIndexByHeader(VanguardSpreadSheet::TestHeaders::ActualResult);
 			for(int32 i = 1; i < SpreadsheetObject->GetNumberOfRows(); i++)
 			{
 				FOmniSpreadsheetCell Cell = SpreadsheetObject->GetCellData(i, ExpectedResultColumn);
@@ -336,6 +337,14 @@ void UTestAssistantComponent::OnTestFinished()
 				{
 					UOmniEditorLibrary::RaiseScriptError(FString("Expected Result cell is empty in row " + FString::FromInt(i)));
 					TestActor->AddError(FString("Expected Result cell is empty in row " + FString::FromInt(i)));
+					TestActor->Result = EFunctionalTestResult::Failed;
+				}
+				
+				Cell = SpreadsheetObject->GetCellData(i, ActualResultColumn);
+				if(Cell.Text.IsEmpty())
+				{
+					UOmniEditorLibrary::RaiseScriptError(FString("Actual Result cell is empty in row " + FString::FromInt(i)));
+					TestActor->AddError(FString("Actual Result cell is empty in row " + FString::FromInt(i)));
 					TestActor->Result = EFunctionalTestResult::Failed;
 				}
 			}
