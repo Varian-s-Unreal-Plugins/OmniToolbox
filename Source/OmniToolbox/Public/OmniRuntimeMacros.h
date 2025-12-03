@@ -10,7 +10,7 @@
 /**Trace with string label*/
 #define Omni_InsightsTrace_Str(Text) TRACE_CPUPROFILER_EVENT_SCOPE_STR(Text)
 #define Omni_InsightsTrace() TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__)
-#define Omni_InsightsTrace_Append(Text) TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("%hs ::Text"), __FUNCTION__)
+#define Omni_InsightsTrace_Append(Text) TRACE_CPUPROFILER_EVENT_SCOPE_STR(TCHAR_TO_ANSI(*FString::Printf(TEXT("%hs::%hs"), __FUNCTION__, Text)));
 
 
 struct FOmniRunOnStartupHelper
