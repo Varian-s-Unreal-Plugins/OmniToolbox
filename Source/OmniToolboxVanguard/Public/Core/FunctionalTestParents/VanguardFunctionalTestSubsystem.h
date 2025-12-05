@@ -13,6 +13,7 @@ enum class EFunctionalTestResult : uint8;
 class AVanguardFunctionalTest;
 
 extern OMNITOOLBOXVANGUARD_API bool GenerateSpreadsheets;
+extern OMNITOOLBOXVANGUARD_API bool OverrideIsAutomationTesting;
 
 namespace VanguardSpreadSheet
 {

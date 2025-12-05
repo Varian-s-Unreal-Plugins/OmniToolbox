@@ -23,6 +23,9 @@ Omni_ConsoleVariable(OMNITOOLBOXVANGUARD_API, bool, OverrideIsAutomationTesting,
 
 void UVanguardFunctionalTestSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	/**V: Note: If we change @GIsAutomationTesting, the screen just goes black and it
+	 * seems that the application crashes. Hence why we aren't just simply changing
+	 * the value of it. */
 	if(GIsAutomationTesting == false && OverrideIsAutomationTesting == false)
 	{
 		Super::Initialize(Collection);
@@ -71,6 +74,7 @@ void UVanguardFunctionalTestSubsystem::Initialize(FSubsystemCollectionBase& Coll
 			VanguardSpreadSheet::PerformanceHeaders::TestTime,
 			VanguardSpreadSheet::PerformanceHeaders::Status
 		},
+			GenerateSpreadsheets == false,
 			FilepathToUse);
 	}
 	
@@ -157,6 +161,7 @@ void UVanguardFunctionalTestSubsystem::TestEnding(UTestAssistantComponent* Test,
 
 void UVanguardFunctionalTestSubsystem::Tick(float DeltaTime)
 {
+#if FunctionalTestingEnabled
 	if(PerformanceSpreadsheet == nullptr)
 	{
 		Super::Tick(DeltaTime);
@@ -165,18 +170,21 @@ void UVanguardFunctionalTestSubsystem::Tick(float DeltaTime)
 	
 	const UVanguardTestingSettings* Settings = GetDefault<UVanguardTestingSettings>();
 	
-	float FrameDifference = DeltaTime - LastDeltaTime;
-	if(FrameDifference > Settings->HitchDeltaThreshold && PerformanceSpreadsheet && CurrentTest.IsValid())
+	if(CurrentTest.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Hitch detected in the test. DeltaTime: %f"), DeltaTime);
-		CurrentTest.Get()->HitchesDetected++;
-		int32 HitchesColumn = PerformanceSpreadsheet->GetColumnIndexByHeader("Hitches");
-		PerformanceSpreadsheet->EditCell(GetRow(), HitchesColumn, FString::FromInt(CurrentTest.Get()->HitchesDetected));
+		float FrameDifference = DeltaTime - LastDeltaTime;
+		if(FrameDifference > Settings->HitchDeltaThreshold && PerformanceSpreadsheet && CurrentTest.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hitch detected in the test. DeltaTime: %f"), DeltaTime);
+			CurrentTest.Get()->HitchesDetected++;
+			int32 HitchesColumn = PerformanceSpreadsheet->GetColumnIndexByHeader("Hitches");
+			PerformanceSpreadsheet->EditCell(GetRow(), HitchesColumn, FString::FromInt(CurrentTest.Get()->HitchesDetected));
+		}
+	
+		LastDeltaTime = DeltaTime;
+	
+		Frames.Add(DeltaTime);
 	}
-	
-	LastDeltaTime = DeltaTime;
-	
-	Frames.Add(DeltaTime);
-	
+#endif
 	Super::Tick(DeltaTime);
 }

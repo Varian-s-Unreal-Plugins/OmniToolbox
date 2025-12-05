@@ -193,6 +193,7 @@ void UTestAssistantComponent::OnTestPrepare()
 			VanguardSpreadSheet::TestHeaders::ExpectedResult,
 			VanguardSpreadSheet::TestHeaders::ActualResult
 			},
+			GenerateSpreadsheets == false,
 			Subsystem->FilepathToUse,
 			GetOwner()->GetClass()->GetAuthoredName());
 		
