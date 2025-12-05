@@ -76,9 +76,8 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 						false, 0, Command.DepthPriority, Command.Thickness);
 				}
 				#if ENABLE_VISUAL_LOG
-				/**There is no line for the visual logger. Fake it with a really thin capsule*/
-				FVisualLogger::CapsuleLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
-					, Command.Location, (Command.End - Command.Location).Size() / 2, Command.Thickness, FQuat::MakeFromRotator(FRotationMatrix::MakeFromZ(Command.End - Command.Location).Rotator()), Command.Color.ToFColor(true), Command.Wireframe, TEXT("%s"), *Command.Text);
+				FVisualLogger::SegmentLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log,
+					Command.Location, Command.End, Command.Color.ToFColor(true), Command.Thickness * 3, TEXT("%s"), *Command.Text);
 				#endif
 				if(Command.AddMessageToLog)
 				{
@@ -173,6 +172,9 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				 * other shapes */
 				FVisualLogger::SphereLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
 					, Command.Location, 0, Command.Color.ToFColor(true), Command.Wireframe, TEXT("%s"), *Command.Text);
+				/**Majority of the time when you log text, you also want it to appear in the log section*/
+				FVisualLogger::CategorizedLogf(Command.Owner.Get(), Command.LogCategory, DefaultVerbosity
+					, TEXT("%s"), *Command.Text);
 				#endif
 				if(Command.AddMessageToLog)
 				{
