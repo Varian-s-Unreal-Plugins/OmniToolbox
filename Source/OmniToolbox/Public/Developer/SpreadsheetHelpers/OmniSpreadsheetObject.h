@@ -44,9 +44,13 @@ class OMNITOOLBOX_API UOmniSpreadsheetObject : public UObject
 
 public:
 
-	/** Initialize a new HTML table file */
+	/** Initialize a new HTML table file.
+	 * If @DoNotCreateFile is set to true, we won't generate a spreadsheet file,
+	 * but we will continue functioning. This can be useful for using this
+	 * class to validate data, but you might not always want to generate
+	 * a file to disk. */
 	UFUNCTION(BlueprintCallable, Category = "Omni Spreadsheet Object")
-	bool Initialize(const TArray<FString>& InHeaders, FString CustomDirectory = "", FString CustomFileName = "");
+	void Initialize(const TArray<FString>& InHeaders, bool DoNotCreateFile = false, FString CustomDirectory = "", FString CustomFileName = "");
 
 	/** File path to the HTML file this object is managing */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Omni Spreadsheet Object")
