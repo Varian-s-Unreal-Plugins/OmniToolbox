@@ -111,6 +111,9 @@ public:
 		return RowIndex;
 	}
 	
+	UFUNCTION(Category = "Vanguard Functional Test", BlueprintCallable, BlueprintPure)
+	int32 GetNumberOfActualResults();
+	
 	/**This is stored in here for simplicity, but it's NOT modified
 	 * by this actor. It's modified by the subsystem.
 	 * It's done like this because we might not want these tests to

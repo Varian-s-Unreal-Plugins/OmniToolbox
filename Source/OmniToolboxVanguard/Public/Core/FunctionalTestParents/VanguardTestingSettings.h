@@ -29,6 +29,11 @@ class OMNITOOLBOXVANGUARD_API UVanguardTestingSettings : public UDeveloperSettin
 	
 public:
 	
+	/**Should every test be labeled with a tag?
+	 * TODO: Implement this */
+	UPROPERTY(Category = "Functional Test", EditAnywhere, Config)
+	bool EnforceTagsOnAllTests = true;
+	
 	/**When the tests are being run, we check on tick the delta between
 	 * the last frame and the current frame. If the delta exceeds
 	 * this amount, then we increment the "Hitches" section in

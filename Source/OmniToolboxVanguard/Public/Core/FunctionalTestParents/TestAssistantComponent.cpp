@@ -36,6 +36,13 @@ void UTestAssistantComponent::WriteSpecificResult(EVanguardExcelHeader Header, F
 	int32 Row = RowOverride < 0 ? RowIndex : RowOverride;
 	
 	int32 ExpectedResultColumnIndex = SpreadsheetObject->GetColumnIndexByHeader(VanguardSpreadSheet::TestHeaders::ExpectedResult);
+	
+	if(SpreadsheetObject->Rows.IsValidIndex(Row) == false)
+	{
+		UE_LOG(LogVanguard, Error, TEXT("Tried to make a row, but no row could be found. Most likely missing @StartNewSpreadsheetRow function call"))
+		return;
+	}
+	
 	/**Get the value of the "Expected Results" cell within the row we are trying to modify */
 	FString LastExpectedResult = SpreadsheetObject->Rows[Row][ExpectedResultColumnIndex].Text;
 	
@@ -130,6 +137,22 @@ void UTestAssistantComponent::StartNewSpreadsheetRow(FString NewSpreadsheetRow)
 		#endif
 	}
 #endif
+}
+
+int32 UTestAssistantComponent::GetNumberOfActualResults()
+{
+	int32 FinalResult = 0;
+	int32 ActualResultColumn = SpreadsheetObject->GetColumnIndexByHeader(VanguardSpreadSheet::TestHeaders::ActualResult);
+	for(int32 i = 1; i < SpreadsheetObject->GetNumberOfRows(); i++)
+	{
+		FOmniSpreadsheetCell Cell = SpreadsheetObject->GetCellData(i, ActualResultColumn);
+		if(Cell.Text.IsEmpty() == false)
+		{
+			FinalResult++;
+		}
+	}
+	
+	return FinalResult;
 }
 
 
