@@ -358,9 +358,36 @@ void UOmniEditorLibrary::DrawAndLogBox(UObject* WorldContextObject, FVector Cent
 	});
 }
 
+void UOmniEditorLibrary::DrawAndLogRotatedBox(UObject* WorldContextObject, FVector Center, FVector Extent,
+	FQuat Rotation, FString Key, FString Text, FLinearColor Color, FName LogCategory, float Lifetime,
+	bool bAddToMessageLog, bool bWireframe, EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
+{
+	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Key, Thickness, Lifetime, Center, Extent, Rotation]()
+	{
+		if(UOmniDebugDrawSubsystem* DrawSubsystem = WorldContextObject->GetWorld()->GetSubsystem<UOmniDebugDrawSubsystem>())
+		{
+			FOmniDebugDrawCommand DrawCommand;
+			DrawCommand.Owner = WorldContextObject;
+			DrawCommand.Type = EOmniDebugDrawType::RotatedBox;
+			DrawCommand.Location = Center;
+			DrawCommand.Extent = Extent;
+			DrawCommand.Rotation = Rotation;
+			DrawCommand.Color = Color;
+			DrawCommand.Text = Text;
+			DrawCommand.Lifetime = Lifetime;
+			DrawCommand.AddMessageToLog = bAddToMessageLog;
+			DrawCommand.Wireframe = bWireframe;
+			DrawCommand.LogCategory = LogCategory;
+			DrawCommand.DepthPriority =  DepthPriority == EDrawDebugSceneDepthPriorityGroup::World ? ESceneDepthPriorityGroup::SDPG_World : ESceneDepthPriorityGroup::SDPG_Foreground;
+			DrawCommand.Thickness = Thickness;
+			DrawSubsystem->AddShape(DrawCommand, FName(Key));
+		}
+	});
+}
+
 void UOmniEditorLibrary::DrawAndLogSphere(UObject* WorldContextObject, FVector Center, float Radius, FString Key, FString Text,
-	FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog, bool bWireframe,
-	EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
+                                          FLinearColor Color, FName LogCategory, float Lifetime, bool bAddToMessageLog, bool bWireframe,
+                                          EDrawDebugSceneDepthPriorityGroup DepthPriority, float Thickness)
 {
 	AsyncTask(ENamedThreads::GameThread, [WorldContextObject, Center, Radius, Color, Text, bAddToMessageLog, bWireframe, LogCategory, DepthPriority, Thickness, Key, Lifetime]()
 	{

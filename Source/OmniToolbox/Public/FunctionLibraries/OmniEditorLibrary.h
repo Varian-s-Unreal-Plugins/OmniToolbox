@@ -83,6 +83,10 @@ public:
 		float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);
 	
 	UFUNCTION(Category = "OmniToolbox|Draw Debug", BlueprintCallable, meta = (DevelopmentOnly, WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject", AdvancedDisplay=6))
+	static void DrawAndLogRotatedBox(UObject* WorldContextObject, FVector Center, FVector Extent, FQuat Rotation, FString Key, FString Text, FLinearColor Color = FLinearColor::White, FName LogCategory = TEXT("VisLog"), 
+		float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);
+	
+	UFUNCTION(Category = "OmniToolbox|Draw Debug", BlueprintCallable, meta = (DevelopmentOnly, WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject", AdvancedDisplay=6))
 	static void DrawAndLogSphere(UObject* WorldContextObject, FVector Center, float Radius, FString Key = "", FString Text = "", FLinearColor Color = FLinearColor::White, FName LogCategory = TEXT("VisLog"), 
 		float Lifetime = 3, bool bAddToMessageLog = false, bool bWireframe = true, EDrawDebugSceneDepthPriorityGroup DepthPriority = EDrawDebugSceneDepthPriorityGroup::World, float Thickness = 1.5);
 	

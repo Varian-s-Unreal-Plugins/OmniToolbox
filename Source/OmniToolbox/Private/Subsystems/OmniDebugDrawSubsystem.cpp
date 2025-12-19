@@ -201,6 +201,23 @@ void UOmniDebugDrawSubsystem::Tick(float DeltaTime)
 				
 				break;
 			}
+		case RotatedBox:
+			if(DrawDebugShapes)
+			{
+				DrawDebugBox(GetWorld(), Command.Location, Command.Extent, Command.Rotation, Command.Color.ToFColor(true),
+					false, 0, Command.DepthPriority, Command.Thickness);
+			}
+			FBox Box = FBox(Command.Location - Command.Extent, Command.Location + Command.Extent);
+			#if ENABLE_VISUAL_LOG
+			FVisualLogger::BoxLogf(Command.Owner.Get(), Command.LogCategory, ELogVerbosity::Log
+				, Box, Command.Rotation.ToMatrix(), 
+				Command.Color.ToFColor(true), Command.Wireframe, TEXT("%s"), *Command.Text);
+			#endif
+			if(Command.AddMessageToLog)
+			{
+				VLOG_BP_LIBRARY_ADD_TO_LOG(Command.LogCategory, TEXT("LogBox: '%s' - BoxMin: (%s) | BoxMax: (%s)"), *Command.Text, *Box.Min.ToString(), *Box.Max.ToString());
+			}
+			break;
 		}
 		
 		Command.Lifetime -= DeltaTime;

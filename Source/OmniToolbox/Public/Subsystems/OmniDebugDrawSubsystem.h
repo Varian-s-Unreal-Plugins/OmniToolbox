@@ -12,6 +12,7 @@ enum EOmniDebugDrawType
 	Circle,
 	Line,
 	Box,
+	RotatedBox,
 	Sphere,
 	Capsule,
 	Arrow,
