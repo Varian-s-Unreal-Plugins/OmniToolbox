@@ -122,7 +122,7 @@ class OMNITOOLBOX_API UOmniHelperLibrary : public UBlueprintFunctionLibrary
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOmniDelayPayloadEvent, FInstancedStruct, Payload);
 
 UCLASS()
-class UOmniDelayWithPayload : public UBlueprintAsyncActionBase
+class OMNITOOLBOX_API UOmniDelayWithPayload : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
@@ -143,7 +143,7 @@ public:
 };
 
 UCLASS()
-class UOmniAsyncLoadClassWithPayload : public UBlueprintAsyncActionBase
+class OMNITOOLBOX_API UOmniAsyncLoadClassWithPayload : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
@@ -161,7 +161,7 @@ public:
 };
 
 UCLASS()
-class UOmniAsyncLoadAssetWithPayload : public UBlueprintAsyncActionBase
+class OMNITOOLBOX_API UOmniAsyncLoadAssetWithPayload : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
