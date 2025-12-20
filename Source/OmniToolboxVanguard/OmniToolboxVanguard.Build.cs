@@ -27,6 +27,15 @@ public class OmniToolboxVanguard : ModuleRules
                 "TraceUtilities",
             }
         );
+        
+        if (Target.Configuration != UnrealTargetConfiguration.Shipping || Target.bBuildEditor)
+        {
+            PublicDefinitions.Add("WITH_INSIGHTS_TRACE=1");
+        }
+        else
+        {
+            PublicDefinitions.Add("WITH_INSIGHTS_TRACE=0");
+        }
 
         if(Target.bBuildDeveloperTools)
         {
