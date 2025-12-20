@@ -20,6 +20,10 @@
 #include "FunctionalTest.h"
 #endif
 
+#ifndef WITH_INSIGHTS_TRACE
+#define WITH_INSIGHTS_TRACE (!(UE_BUILD_SHIPPING || UE_BUILD_SHIPPING_WITH_EDITOR || UE_BUILD_TEST) && 1)
+#endif // WITH_INSIGHTS_TRACE
+
 UTestAssistantComponent::UTestAssistantComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -276,16 +280,9 @@ void UTestAssistantComponent::OnTestPrepare()
 	if(AutomaticallyStartInsightsTrace)
 	{
 #if UE_TRACE_ENABLED && WITH_INSIGHTS_TRACE
-		FTraceAuxiliary::FOptions TracingOptions;
-		TracingOptions.bExcludeTail = true;  // optional: exclude pre-trace buffer history
 
 		FString TraceFileName = FString::Printf(TEXT("%s"), *GetOwner()->GetClass()->GetAuthoredName());
-		bool IsTracing = FTraceAuxiliary::Start(
-			FTraceAuxiliary::EConnectionType::File,
-			nullptr,
-			nullptr,
-			&TracingOptions
-		);
+		bool IsTracing = UTraceUtilLibrary::StartTraceToFile(TraceFileName, TArray<FString>{});
 		
 		UE_LOG(LogVanguard, Log, TEXT("Is Tracing set to: %s"), IsTracing ? *FString("True") : *FString("False"));
 #endif
@@ -397,7 +394,7 @@ void UTestAssistantComponent::OnTestFinished()
 		if(AutomaticallyStartInsightsTrace)
 		{
 			#if UE_TRACE_ENABLED && WITH_INSIGHTS_TRACE
-			if(FTraceAuxiliary::Stop())
+			if(UTraceUtilLibrary::StopTracing())
 			{
 				Omni_InsightsTrace_Append("EndInsightsTrace")
 				/**There's no real clean way of accessing the file that Insights just wrote to.
