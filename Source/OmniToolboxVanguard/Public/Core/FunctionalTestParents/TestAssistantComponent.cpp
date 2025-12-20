@@ -276,7 +276,7 @@ void UTestAssistantComponent::OnTestPrepare()
 	
 	if(AutomaticallyStartInsightsTrace)
 	{
-#if UE_TRACE_ENABLED
+#if UE_TRACE_ENABLED && !UE_BUILD_SHIPPING
 		FTraceAuxiliary::FOptions TracingOptions;
 		TracingOptions.bExcludeTail = true;  // optional: exclude pre-trace buffer history
 
@@ -397,7 +397,7 @@ void UTestAssistantComponent::OnTestFinished()
 		
 		if(AutomaticallyStartInsightsTrace)
 		{
-			#if UE_TRACE_ENABLED
+			#if UE_TRACE_ENABLED && !UE_BUILD_SHIPPING
 			if(FTraceAuxiliary::Stop())
 			{
 				Omni_InsightsTrace_Append("EndInsightsTrace")
