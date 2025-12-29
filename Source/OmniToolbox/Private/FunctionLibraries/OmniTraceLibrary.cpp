@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "WorldCollision.h"
+#include "FunctionLibraries/OmniEditorLibrary.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
 
@@ -486,25 +487,49 @@ void UOmniTraceLibrary::AsyncBoxTrace(UObject* WorldContextObject, const FVector
         TraceType = EAsyncTraceType::Single;
     }
     
-    else
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
     {
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-        HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
+    
+    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeBox(Extent), QueryParams, ResponseParam, TraceDelegate);
+}
+
+bool UOmniTraceLibrary::DebugHitResults(const UObject* WorldContext, const FTraceDebug& DebugOptions,
+    TArray<FHitResult> HitResult)
+{
+    bool BlockingHitFound = false;
+    
+    if(HitResult.IsEmpty() == false)
+    {
+        int32 Index = -1;
         for(auto& CurrentHit : HitResult)
         {
+            Index++;
             if(CurrentHit.bBlockingHit)
             {
-                // DrawDebugLine(WorldContext->GetWorld(), CurrentHit.TraceStart, CurrentHit.TraceEnd, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugLine(WorldContext->GetWorld(), CurrentHit.ImpactPoint, CurrentHit.TraceEnd, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
+                BlockingHitFound = true;
+                UOmniEditorLibrary::DrawAndLogBox(WorldContext->GetWorld(), CurrentHit.ImpactPoint, FVector(5), FString::Printf(TEXT("%s_%i"), *DebugOptions.TraceTag.ToString(), Index), "", DebugOptions.HitColor);
             }
             else if(CurrentHit.Component.IsValid())
             {
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
+                UOmniEditorLibrary::DrawAndLogBox(WorldContext->GetWorld(), CurrentHit.ImpactPoint, FVector(5), FString::Printf(TEXT("%s_%i"), *DebugOptions.TraceTag.ToString(), Index), "", DebugOptions.OverlapColor);
             }
         }
     }
+    
+    return BlockingHitFound;
+}
+
+void UOmniTraceLibrary::HandleLineTraceDebug(const UObject* WorldContext, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult)
+{
+    if(!DebugOptions.bEnableDebug) { return; }
+    
+    UOmniEditorLibrary::DrawAndLogLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.TraceTag.ToString(), "",
+    DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }
 
 void UOmniTraceLibrary::HandleSphereTraceDebug(const UObject* WorldContext, const float Radius,
@@ -512,34 +537,8 @@ void UOmniTraceLibrary::HandleSphereTraceDebug(const UObject* WorldContext, cons
 {
     if(!DebugOptions.bEnableDebug) { return; }
     
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        DrawDebugSphere(WorldContext->GetWorld(), DebugOptions.End, Radius, 16, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                DrawDebugSphere(WorldContext->GetWorld(), CurrentHit.Location, Radius, 16, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugSphere(WorldContext->GetWorld(), CurrentHit.Location, Radius, 16, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else
-            {
-                DrawDebugSphere(WorldContext->GetWorld(), CurrentHit.Location, Radius, 16, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-            HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
+    UOmniEditorLibrary::DrawAndLogSphere(WorldContext->GetWorld(), DebugOptions.Start, Radius, DebugOptions.TraceTag.ToString(), "", 
+        DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }
 
 void UOmniTraceLibrary::HandleCapsuleTraceDebug(const UObject* WorldContext, const float Radius,
@@ -547,66 +546,14 @@ void UOmniTraceLibrary::HandleCapsuleTraceDebug(const UObject* WorldContext, con
 {
     if(!DebugOptions.bEnableDebug) { return; }
     
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        DrawDebugCapsule(WorldContext->GetWorld(), DebugOptions.End, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                DrawDebugCapsule(WorldContext->GetWorld(), CurrentHit.Location, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugCapsule(WorldContext->GetWorld(), CurrentHit.Location, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else
-            {
-                DrawDebugCapsule(WorldContext->GetWorld(), CurrentHit.Location, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-            HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
+    UOmniEditorLibrary::DrawAndLogCapsule(WorldContext->GetWorld(), DebugOptions.Start, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.TraceTag.ToString(), "", 
+        DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }
 
 void UOmniTraceLibrary::HandleBoxTraceDebug(const UObject* WorldContext, const FVector& Shape, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult)
 {
     if(!DebugOptions.bEnableDebug) { return; }
     
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        DrawDebugBox(WorldContext->GetWorld(), DebugOptions.End, Shape, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                DrawDebugBox(WorldContext->GetWorld(), CurrentHit.Location, Shape, DebugOptions.Rotation, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugBox(WorldContext->GetWorld(), CurrentHit.Location, Shape, DebugOptions.Rotation, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else
-            {
-                DrawDebugBox(WorldContext->GetWorld(), CurrentHit.Location, Shape, DebugOptions.Rotation, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-            HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
+    UOmniEditorLibrary::DrawAndLogBox(WorldContext->GetWorld(), DebugOptions.Start, Shape, DebugOptions.TraceTag.ToString(), "", 
+    DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }

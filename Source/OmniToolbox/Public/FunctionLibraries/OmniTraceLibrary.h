@@ -224,6 +224,9 @@ public:
 
 #pragma region Debug
 
+    /**Draw debug boxes for the hit results.
+     * Returns true if any blocking hit was found */
+    static bool DebugHitResults(const UObject* WorldContext, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
     static void HandleLineTraceDebug(const UObject* WorldContext, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
     static void HandleSphereTraceDebug(const UObject* WorldContext, const float Radius, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
     static void HandleCapsuleTraceDebug(const UObject* WorldContext, const float Radius, const float HalfHeight, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
