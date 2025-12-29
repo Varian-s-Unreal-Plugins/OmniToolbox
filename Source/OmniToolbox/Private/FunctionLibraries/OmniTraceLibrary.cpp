@@ -37,6 +37,38 @@ FCollisionResponseContainer UOmniTraceLibrary::CreateResponseContainer(
     return ResponseParam.CollisionResponse;
 }
 
+void UOmniTraceLibrary::FilterHitResultsByLineOfSight(TArray<FHitResult>& HitResultsToFilter,
+    UObject* WorldContextObject, const FVector& Start, FName Profile,
+    FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex,
+    FTraceDebug DebugOptions)
+{
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActors(IgnoredActors);
+    QueryParams.TraceTag = DebugOptions.TraceTag;
+    QueryParams.bTraceComplex = TraceComplex;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
+    
+    for(int i = 0; i < HitResultsToFilter.Num(); ++i)
+    {
+        bool bHit;
+        FHitResult SingleHitResult;
+        bHit = WorldContextObject->GetWorld()->LineTraceSingleByChannel(SingleHitResult, Start, HitResultsToFilter[i].ImpactPoint, TraceChannel, QueryParams, ResponseParam);
+        if(bHit && SingleHitResult.GetComponent() != HitResultsToFilter[i].GetComponent())
+        {
+            HitResultsToFilter.RemoveAt(i, EAllowShrinking::No);
+            i--;
+        }
+    }
+    
+    HitResultsToFilter.Shrink();
+}
 
 TArray<FHitResult> UOmniTraceLibrary::LineTrace(UObject* WorldContextObject,
                                                 const FVector& Start,

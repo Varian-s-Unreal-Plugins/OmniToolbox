@@ -141,6 +141,13 @@ public:
     UFUNCTION(Category = "Trace Helpers", BlueprintCallable, BlueprintPure)
     static FCollisionResponseContainer CreateResponseContainer(FTraceChannelAndResponseContainer CustomChannelResponses);
     
+    /**Takes in an array of hit results and a world location.
+     * It then performs a line trace to each hit result to find
+     * out if they have LOS of the origin point. */
+    UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+    static void FilterHitResultsByLineOfSight(TArray<FHitResult>& HitResultsToFilter, UObject* WorldContextObject, const FVector& Start,
+        UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+    
     /**Perform a line trace.
      * @ResultType Is this a multi, single or test trace?
      * @CustomChannelResponses Allows you to assign unique responses to specific channels.
