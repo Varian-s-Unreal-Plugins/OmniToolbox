@@ -19,6 +19,10 @@ public class OmniToolbox : ModuleRules
         {
             PublicDefinitions.Add("ObjectTags_Enabled=0");
         }
+        
+        /*To simplify my commits for other plugins that are being developed
+         with OmniToolbox's future debugger, this is being added here*/
+        PublicDefinitions.Add("OmniDebugger=0");
 
         PublicDependencyModuleNames.AddRange(
             new string[]
