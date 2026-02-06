@@ -10,7 +10,6 @@ public class OmniToolboxValidation : ModuleRules
             new string[]
             {
                 "Core", 
-                "DataValidation",
             }
         );
 
@@ -24,8 +23,16 @@ public class OmniToolboxValidation : ModuleRules
                 "DeveloperSettings",
                 "BlueprintGraph",
                 "Kismet",
-                "UnrealEd"
             }
         );
+        
+        if(Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
+            {
+                "DataValidation",
+                "UnrealEd",
+            });
+        }
     }
 }

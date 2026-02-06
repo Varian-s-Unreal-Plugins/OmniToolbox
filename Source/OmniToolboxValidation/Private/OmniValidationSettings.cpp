@@ -7,6 +7,7 @@
 
 void UOmniValidationSettings::OpenBlueprintAndFocusNode(UBlueprint* Blueprint, UEdGraph* Graph, UEdGraphNode* Node)
 {
+#if WITH_EDITOR
 	if (!Blueprint || !Graph || !Node) return;
 
 	// Open the Blueprint editor (or bring it to front)
@@ -26,4 +27,5 @@ void UOmniValidationSettings::OpenBlueprintAndFocusNode(UBlueprint* Blueprint, U
 
 	// Select and zoom to the node
 	BlueprintEditor->JumpToHyperlink(Node, false); // false: don't request rename
+#endif
 }
