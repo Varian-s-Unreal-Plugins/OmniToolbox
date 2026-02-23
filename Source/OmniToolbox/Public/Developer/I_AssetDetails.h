@@ -43,7 +43,8 @@ inline UI_AssetDetails::UI_AssetDetails(const class FObjectInitializer& ObjectIn
 
 namespace OmniToolbox
 {
-	static FLinearColor BlueprintAssetColor = FLinearColor(FColor( 63, 126, 255 ));
+	static FLinearColor BlueprintAssetColor = FLinearColor(FColor( 63, 126, 255));
+	static FLinearColor DataAssetColor = FLinearColor(FColor(201, 29, 85));
 }
 
 /**
