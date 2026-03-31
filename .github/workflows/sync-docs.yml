@@ -1,0 +1,13 @@
+name: Sync Docs to Global
+on:
+  push:
+    branches: [main]
+    paths: ["Documentation/**"]
+
+jobs:
+  sync-docs:
+    uses: Varian-s-Unreal-Plugins/Documentation/.github/workflows/sync-plugin-docs.yml@main
+    with:
+      target_subfolder: "Agent Intelligence Framework"
+    secrets:
+      DOCS_PAT: ${{ secrets.DOCS_PAT }}
