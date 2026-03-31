@@ -8,6 +8,6 @@ jobs:
   sync-docs:
     uses: Varian-s-Unreal-Plugins/Documentation/.github/workflows/sync-plugin-docs.yml@main
     with:
-      target_subfolder: "Agent Intelligence Framework"
+      target_subfolder: "OmniToolbox"
     secrets:
       DOCS_PAT: ${{ secrets.DOCS_PAT }}
