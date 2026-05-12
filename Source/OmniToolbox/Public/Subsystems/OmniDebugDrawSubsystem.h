@@ -12,6 +12,7 @@ enum EOmniDebugDrawType
 	Circle,
 	Line,
 	Box,
+	RotatedBox,
 	Sphere,
 	Capsule,
 	Arrow,
@@ -27,7 +28,7 @@ struct FOmniDebugDrawCommand
 {
 	GENERATED_BODY()
 	
-	EOmniDebugDrawType Type;
+	EOmniDebugDrawType Type = EOmniDebugDrawType::Circle;
 	
 	FVector Location;
 	
@@ -37,24 +38,24 @@ struct FOmniDebugDrawCommand
 	
 	FVector Extent;
 	
-	float Length;
+	float Length = 0;
 	
-	float Radius;
+	float Radius = 0;
 	
-	float AngleWidth;
-	float AngleHeight;
+	float AngleWidth = 0;
+	float AngleHeight = 0;
 	
-	float HalfHeight;
+	float HalfHeight = 0;
 	
 	FQuat Rotation;
 	
 	FLinearColor Color;
 	
-	uint8 DepthPriority;
+	uint8 DepthPriority = 0;
 	
-	float Thickness;
+	float Thickness = 0;
 	
-	float ArrowSize;
+	float ArrowSize = 0;
 	
 	FName LogCategory;
 	

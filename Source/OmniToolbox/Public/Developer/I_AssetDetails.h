@@ -41,6 +41,12 @@ inline UI_AssetDetails::UI_AssetDetails(const class FObjectInitializer& ObjectIn
 	: Super(ObjectInitializer)
 {}
 
+namespace OmniToolbox
+{
+	static FLinearColor BlueprintAssetColor = FLinearColor(FColor( 63, 126, 255));
+	static FLinearColor DataAssetColor = FLinearColor(FColor(201, 29, 85));
+}
+
 /**
  * This interface is required for a class to be automatically added
  * to the content browsers context menu

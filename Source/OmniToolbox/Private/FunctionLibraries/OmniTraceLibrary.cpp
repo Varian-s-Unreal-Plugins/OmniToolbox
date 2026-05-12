@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "WorldCollision.h"
+#include "FunctionLibraries/OmniEditorLibrary.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 
 
@@ -37,17 +38,51 @@ FCollisionResponseContainer UOmniTraceLibrary::CreateResponseContainer(
     return ResponseParam.CollisionResponse;
 }
 
-TArray<FHitResult> UOmniTraceLibrary::LineTrace(UObject* WorldContextObject,
-    const FVector& Start,
-    const FVector& End,
-    TEnumAsByte<EAsyncTraceResultType> ResultType,
-    const FCollisionResponseContainer& CustomChannelResponses,
-    const TArray<AActor*>& IgnoredActors,
-    bool TraceComplex,
+void UOmniTraceLibrary::FilterHitResultsByLineOfSight(TArray<FHitResult>& HitResultsToFilter,
+    UObject* WorldContextObject, const FVector& Start, FName Profile,
+    FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex,
     FTraceDebug DebugOptions)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(UTraceHelpersLibrary::LineTrace);
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActors(IgnoredActors);
+    QueryParams.TraceTag = DebugOptions.TraceTag;
+    QueryParams.bTraceComplex = TraceComplex;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
+    
+    for(int i = 0; i < HitResultsToFilter.Num(); ++i)
+    {
+        bool bHit;
+        FHitResult SingleHitResult;
+        bHit = WorldContextObject->GetWorld()->LineTraceSingleByChannel(SingleHitResult, Start, HitResultsToFilter[i].ImpactPoint, TraceChannel, QueryParams, ResponseParam);
+        if(bHit && SingleHitResult.GetComponent() != HitResultsToFilter[i].GetComponent())
+        {
+            HitResultsToFilter.RemoveAt(i, EAllowShrinking::No);
+            i--;
+        }
+    }
+    
+    HitResultsToFilter.Shrink();
+}
 
+TArray<FHitResult> UOmniTraceLibrary::LineTrace(UObject* WorldContextObject,
+                                                const FVector& Start,
+                                                const FVector& End,
+                                                TEnumAsByte<EAsyncTraceResultType> ResultType,
+                                                UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile,
+                                                FOmniTraceChannelSettings TraceSettings,
+                                                const TArray<AActor*>& IgnoredActors, 
+                                                bool TraceComplex,
+                                                FTraceDebug DebugOptions)
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(UTraceHelpersLibrary::LineTrace);
+    
     TArray<FHitResult> HitResult;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActors(IgnoredActors);
@@ -55,23 +90,31 @@ TArray<FHitResult> UOmniTraceLibrary::LineTrace(UObject* WorldContextObject,
     QueryParams.bTraceComplex = TraceComplex;
     DebugOptions.Start = Start;
     DebugOptions.End = End;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
 
     bool bHit;
     FHitResult SingleHitResult;
     switch(ResultType)
     {
     case MultiResult:
-        WorldContextObject->GetWorld()->LineTraceMultiByChannel(HitResult, Start, End, (ECollisionChannel) 0, QueryParams, CustomChannelResponses);
+        WorldContextObject->GetWorld()->LineTraceMultiByChannel(HitResult, Start, End, TraceChannel, QueryParams, ResponseParam);
         break;
     case SingleResult:
-        bHit = WorldContextObject->GetWorld()->LineTraceSingleByChannel(SingleHitResult, Start, End, (ECollisionChannel) 0, QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->LineTraceSingleByChannel(SingleHitResult, Start, End, TraceChannel, QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
         }
         break;
     case TestResult:
-        bHit = WorldContextObject->GetWorld()->LineTraceTestByChannel(Start, End, (ECollisionChannel) 0, QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->LineTraceTestByChannel(Start, End, TraceChannel, QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
@@ -87,7 +130,7 @@ TArray<FHitResult> UOmniTraceLibrary::LineTrace(UObject* WorldContextObject,
 }
 
 void UOmniTraceLibrary::AsyncLineTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, TEnumAsByte<EAsyncTraceResultType> ResultType,
-    const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
+    const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
 {
     if(!WorldContextObject)
     {
@@ -123,12 +166,20 @@ void UOmniTraceLibrary::AsyncLineTrace(UObject* WorldContextObject, const FVecto
         TraceType = EAsyncTraceType::Single;
     }
     
-    WorldContextObject->GetWorld()->AsyncLineTraceByChannel(TraceType, Start, End, (ECollisionChannel) 0, QueryParams, CustomChannelResponses, TraceDelegate);
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
+    
+    WorldContextObject->GetWorld()->AsyncLineTraceByChannel(TraceType, Start, End, TraceChannel, QueryParams, ResponseParam, TraceDelegate);
 }
 
-TArray<FHitResult> UOmniTraceLibrary::SphereTrace(UObject* WorldContextObject, const FVector& Start,
+    TArray<FHitResult> UOmniTraceLibrary::SphereTrace(UObject* WorldContextObject, const FVector& Start,
     const FVector& End, const float Radius, TEnumAsByte<EAsyncTraceResultType> ResultType,
-    const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors, bool TraceComplex,
+    UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex,
     FTraceDebug DebugOptions)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UTraceHelpersLibrary::SphereTrace);
@@ -138,25 +189,34 @@ TArray<FHitResult> UOmniTraceLibrary::SphereTrace(UObject* WorldContextObject, c
     QueryParams.AddIgnoredActors(IgnoredActors);
     QueryParams.TraceTag = DebugOptions.TraceTag;
     QueryParams.bTraceComplex = TraceComplex;
+    
     DebugOptions.Start = Start;
     DebugOptions.End = End;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
 
     bool bHit;
     FHitResult SingleHitResult;
     switch(ResultType)
     {
     case MultiResult:
-        WorldContextObject->GetWorld()->SweepMultiByChannel(HitResult, Start, End, FQuat::Identity, (ECollisionChannel) 0, FCollisionShape::MakeSphere(Radius), QueryParams, CustomChannelResponses);
+        WorldContextObject->GetWorld()->SweepMultiByChannel(HitResult, Start, End, FQuat::Identity, TraceChannel, FCollisionShape::MakeSphere(Radius), QueryParams, ResponseParam);
         break;
     case SingleResult:
-        bHit = WorldContextObject->GetWorld()->SweepSingleByChannel(SingleHitResult, Start, End, FQuat::Identity, (ECollisionChannel) 0, FCollisionShape::MakeSphere(Radius), QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->SweepSingleByChannel(SingleHitResult, Start, End, FQuat::Identity, TraceChannel, FCollisionShape::MakeSphere(Radius), QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
         }
         break;
     case TestResult:
-        bHit = WorldContextObject->GetWorld()->SweepTestByChannel(Start, End, FQuat::Identity, (ECollisionChannel) 0, FCollisionShape::MakeSphere(Radius), QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->SweepTestByChannel(Start, End, FQuat::Identity, TraceChannel, FCollisionShape::MakeSphere(Radius), QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
@@ -172,8 +232,8 @@ TArray<FHitResult> UOmniTraceLibrary::SphereTrace(UObject* WorldContextObject, c
 
 void UOmniTraceLibrary::AsyncSphereTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End,
     const float Radius, TEnumAsByte<EAsyncTraceResultType> ResultType, const TArray<AActor*>& IgnoredActors,
-    const FCollisionResponseContainer& CustomChannelResponses, FAsyncTraceResultDelegate OnTraceCompleted,
-    bool TraceComplex, FTraceDebug DebugOptions)
+    UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, 
+    FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
 {
     if(!WorldContextObject)
     {
@@ -186,6 +246,14 @@ void UOmniTraceLibrary::AsyncSphereTrace(UObject* WorldContextObject, const FVec
     QueryParams.bTraceComplex = TraceComplex;
     DebugOptions.Start = Start;
     DebugOptions.End = End;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
 
     FTraceDelegate* TraceDelegate = new FTraceDelegate();
     TraceDelegate->BindLambda([OnTraceCompleted, DebugOptions, Radius](const FTraceHandle& TraceHandle, FTraceDatum& TraceData)
@@ -209,13 +277,13 @@ void UOmniTraceLibrary::AsyncSphereTrace(UObject* WorldContextObject, const FVec
         TraceType = EAsyncTraceType::Single;
     }
     
-    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, FQuat::Identity, (ECollisionChannel) 0, FCollisionShape::MakeSphere(Radius), QueryParams, CustomChannelResponses, TraceDelegate);
+    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, FQuat::Identity, TraceChannel, FCollisionShape::MakeSphere(Radius), QueryParams, ResponseParam, TraceDelegate);
 }
 
 TArray<FHitResult> UOmniTraceLibrary::CapsuleTrace(UObject* WorldContextObject, const FVector& Start,
                                                       const FVector& End, FRotator Rotation, const float Radius, const float HalfHeight, TEnumAsByte<EAsyncTraceResultType> ResultType,
-                                                      const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors, bool TraceComplex,
-                                                      FTraceDebug DebugOptions)
+                                                      UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, 
+                                                      const TArray<AActor*>& IgnoredActors, bool TraceComplex, FTraceDebug DebugOptions)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UTraceHelpersLibrary::CapsuleTrace);
 
@@ -229,23 +297,31 @@ TArray<FHitResult> UOmniTraceLibrary::CapsuleTrace(UObject* WorldContextObject, 
     DebugOptions.Start = Start;
     DebugOptions.End = End;
     DebugOptions.Rotation = QuatRotation;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
 
     bool bHit;
     FHitResult SingleHitResult;
     switch(ResultType)
     {
     case MultiResult:
-        WorldContextObject->GetWorld()->SweepMultiByChannel(HitResult, Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, CustomChannelResponses);
+        WorldContextObject->GetWorld()->SweepMultiByChannel(HitResult, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, ResponseParam);
         break;
     case SingleResult:
-        bHit = WorldContextObject->GetWorld()->SweepSingleByChannel(SingleHitResult, Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->SweepSingleByChannel(SingleHitResult, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
         }
         break;
     case TestResult:
-        bHit = WorldContextObject->GetWorld()->SweepTestByChannel(Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->SweepTestByChannel(Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
@@ -262,8 +338,8 @@ TArray<FHitResult> UOmniTraceLibrary::CapsuleTrace(UObject* WorldContextObject, 
 
 void UOmniTraceLibrary::AsyncCapsuleTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End,
     FRotator Rotation, const float Radius, const float HalfHeight, TEnumAsByte<EAsyncTraceResultType> ResultType,
-    const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses,
-    FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
+    const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, 
+    FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
 {
     if(!WorldContextObject)
     {
@@ -302,12 +378,20 @@ void UOmniTraceLibrary::AsyncCapsuleTrace(UObject* WorldContextObject, const FVe
         TraceType = EAsyncTraceType::Single;
     }
     
-    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, CustomChannelResponses, TraceDelegate);
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
+    
+    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeCapsule(Radius, HalfHeight), QueryParams, ResponseParam, TraceDelegate);
 }
 
 TArray<FHitResult> UOmniTraceLibrary::BoxTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, FRotator Rotation, const FVector& Extent,
     TEnumAsByte<EAsyncTraceResultType> ResultType,
-    const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors,
+    UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors,
     bool TraceComplex, FTraceDebug DebugOptions)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UTraceHelpersLibrary::BoxTrace);
@@ -322,23 +406,31 @@ TArray<FHitResult> UOmniTraceLibrary::BoxTrace(UObject* WorldContextObject, cons
     DebugOptions.Start = Start;
     DebugOptions.End = End;
     DebugOptions.Rotation = QuatRotation;
+    
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
 
     bool bHit;
     FHitResult SingleHitResult;
     switch(ResultType)
     {
     case MultiResult:
-        WorldContextObject->GetWorld()->SweepMultiByChannel(HitResult, Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeBox(Extent), QueryParams, CustomChannelResponses);
+        WorldContextObject->GetWorld()->SweepMultiByChannel(HitResult, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeBox(Extent), QueryParams, ResponseParam);
         break;
     case SingleResult:
-        bHit = WorldContextObject->GetWorld()->SweepSingleByChannel(SingleHitResult, Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeBox(Extent), QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->SweepSingleByChannel(SingleHitResult, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeBox(Extent), QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
         }
         break;
     case TestResult:
-        bHit = WorldContextObject->GetWorld()->SweepTestByChannel(Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeBox(Extent), QueryParams, CustomChannelResponses);
+        bHit = WorldContextObject->GetWorld()->SweepTestByChannel(Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeBox(Extent), QueryParams, ResponseParam);
         if(bHit)
         {
             HitResult.Add(SingleHitResult);
@@ -355,8 +447,8 @@ TArray<FHitResult> UOmniTraceLibrary::BoxTrace(UObject* WorldContextObject, cons
 
 void UOmniTraceLibrary::AsyncBoxTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End,
     FRotator Rotation, const FVector& Extent, TEnumAsByte<EAsyncTraceResultType> ResultType,
-    const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses,
-    FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
+    const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile,
+    FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex, FTraceDebug DebugOptions)
 {
     if(!WorldContextObject)
     {
@@ -395,36 +487,49 @@ void UOmniTraceLibrary::AsyncBoxTrace(UObject* WorldContextObject, const FVector
         TraceType = EAsyncTraceType::Single;
     }
     
-    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, QuatRotation, (ECollisionChannel) 0, FCollisionShape::MakeBox(Extent), QueryParams, CustomChannelResponses, TraceDelegate);
+    ECollisionChannel TraceChannel;
+    FCollisionResponseParams ResponseParam;
+    UCollisionProfile::GetChannelAndResponseParams(Profile, TraceChannel, ResponseParam);
+    if(TraceSettings.UseTraceType)
+    {
+        TraceChannel = UEngineTypes::ConvertToCollisionChannel(TraceSettings.TraceType);
+    }
+    
+    WorldContextObject->GetWorld()->AsyncSweepByChannel(TraceType, Start, End, QuatRotation, TraceChannel, FCollisionShape::MakeBox(Extent), QueryParams, ResponseParam, TraceDelegate);
+}
+
+bool UOmniTraceLibrary::DebugHitResults(const UObject* WorldContext, const FTraceDebug& DebugOptions,
+    TArray<FHitResult> HitResult)
+{
+    bool BlockingHitFound = false;
+    
+    if(HitResult.IsEmpty() == false)
+    {
+        int32 Index = -1;
+        for(auto& CurrentHit : HitResult)
+        {
+            Index++;
+            if(CurrentHit.bBlockingHit)
+            {
+                BlockingHitFound = true;
+                UOmniEditorLibrary::DrawAndLogBox(WorldContext->GetWorld(), CurrentHit.ImpactPoint, FVector(5), FString::Printf(TEXT("%s_%i"), *DebugOptions.TraceTag.ToString(), Index), "", DebugOptions.HitColor);
+            }
+            else if(CurrentHit.Component.IsValid())
+            {
+                UOmniEditorLibrary::DrawAndLogBox(WorldContext->GetWorld(), CurrentHit.ImpactPoint, FVector(5), FString::Printf(TEXT("%s_%i"), *DebugOptions.TraceTag.ToString(), Index), "", DebugOptions.OverlapColor);
+            }
+        }
+    }
+    
+    return BlockingHitFound;
 }
 
 void UOmniTraceLibrary::HandleLineTraceDebug(const UObject* WorldContext, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult)
 {
     if(!DebugOptions.bEnableDebug) { return; }
-
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-        HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                // DrawDebugLine(WorldContext->GetWorld(), CurrentHit.TraceStart, CurrentHit.TraceEnd, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugLine(WorldContext->GetWorld(), CurrentHit.ImpactPoint, CurrentHit.TraceEnd, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-    }
+    
+    UOmniEditorLibrary::DrawAndLogLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.TraceTag.ToString(), "",
+    DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }
 
 void UOmniTraceLibrary::HandleSphereTraceDebug(const UObject* WorldContext, const float Radius,
@@ -432,34 +537,8 @@ void UOmniTraceLibrary::HandleSphereTraceDebug(const UObject* WorldContext, cons
 {
     if(!DebugOptions.bEnableDebug) { return; }
     
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        DrawDebugSphere(WorldContext->GetWorld(), DebugOptions.End, Radius, 16, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                DrawDebugSphere(WorldContext->GetWorld(), CurrentHit.Location, Radius, 16, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugSphere(WorldContext->GetWorld(), CurrentHit.Location, Radius, 16, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else
-            {
-                DrawDebugSphere(WorldContext->GetWorld(), CurrentHit.Location, Radius, 16, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-            HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
+    UOmniEditorLibrary::DrawAndLogSphere(WorldContext->GetWorld(), DebugOptions.Start, Radius, DebugOptions.TraceTag.ToString(), "", 
+        DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }
 
 void UOmniTraceLibrary::HandleCapsuleTraceDebug(const UObject* WorldContext, const float Radius,
@@ -467,66 +546,14 @@ void UOmniTraceLibrary::HandleCapsuleTraceDebug(const UObject* WorldContext, con
 {
     if(!DebugOptions.bEnableDebug) { return; }
     
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        DrawDebugCapsule(WorldContext->GetWorld(), DebugOptions.End, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                DrawDebugCapsule(WorldContext->GetWorld(), CurrentHit.Location, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugCapsule(WorldContext->GetWorld(), CurrentHit.Location, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else
-            {
-                DrawDebugCapsule(WorldContext->GetWorld(), CurrentHit.Location, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-            HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
+    UOmniEditorLibrary::DrawAndLogCapsule(WorldContext->GetWorld(), DebugOptions.Start, HalfHeight, Radius, DebugOptions.Rotation, DebugOptions.TraceTag.ToString(), "", 
+        DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }
 
 void UOmniTraceLibrary::HandleBoxTraceDebug(const UObject* WorldContext, const FVector& Shape, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult)
 {
     if(!DebugOptions.bEnableDebug) { return; }
     
-    if(HitResult.IsEmpty())
-    {
-        DrawDebugLine(WorldContext->GetWorld(), DebugOptions.Start, DebugOptions.End, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-        DrawDebugBox(WorldContext->GetWorld(), DebugOptions.End, Shape, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
-    else
-    {
-        for(auto& CurrentHit : HitResult)
-        {
-            if(CurrentHit.bBlockingHit)
-            {
-                DrawDebugBox(WorldContext->GetWorld(), CurrentHit.Location, Shape, DebugOptions.Rotation, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.HitColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else if(CurrentHit.Component.IsValid())
-            {
-                DrawDebugBox(WorldContext->GetWorld(), CurrentHit.Location, Shape, DebugOptions.Rotation, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-                DrawDebugPoint(WorldContext->GetWorld(), CurrentHit.ImpactPoint, DebugOptions.Thickness, DebugOptions.OverlapColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-            else
-            {
-                DrawDebugBox(WorldContext->GetWorld(), CurrentHit.Location, Shape, DebugOptions.Rotation, DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-            }
-        }
-
-        DrawDebugLine(WorldContext->GetWorld(), HitResult.Last().TraceStart, HitResult.Last().Location,
-            HitResult.Last().bBlockingHit ? DebugOptions.HitColor.ToFColor(true) : DebugOptions.MissColor.ToFColor(true), DebugOptions.bPersistentLines, DebugOptions.LifeTime);
-    }
+    UOmniEditorLibrary::DrawAndLogBox(WorldContext->GetWorld(), DebugOptions.Start, Shape, DebugOptions.TraceTag.ToString(), "", 
+    DebugHitResults(WorldContext, DebugOptions, HitResult) ? DebugOptions.HitColor : HitResult.IsEmpty() ? DebugOptions.MissColor : DebugOptions.OverlapColor);
 }

@@ -47,8 +47,9 @@
 		},
 		{
 			"Name": "OmniToolboxVanguard",
-			"Type": "Editor",
+			"Type": "Runtime",
 			"LoadingPhase": "Default",
+			"EditorOnly": true,
 			"PlatformAllowList": [
 				"Win64",
 				"Mac",
@@ -73,6 +74,10 @@
 		},
 		{
 			"Name": "PropertyBindingUtils",
+			"Enabled": true
+		},
+		{
+			"Name": "TraceUtilities",
 			"Enabled": true
 		}
 	]

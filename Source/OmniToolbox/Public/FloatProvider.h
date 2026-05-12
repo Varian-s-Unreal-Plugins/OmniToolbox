@@ -39,7 +39,7 @@ struct FFloatProviderData
 	UPROPERTY(Category = "", BlueprintReadWrite)
 	TWeakObjectPtr<UObject> WorldContext = nullptr;
 	
-	virtual float GetFloat()
+	virtual float GetFloat() const
 	{
 		/**Base struct should not be used. Always return 0*/
 		return 0;
@@ -74,6 +74,11 @@ struct FOmniFloatProvider
 		return FloatProvider.GetMutable<>().GetFloat();
 	}
 	
+	float GetFloatConst() const
+	{
+		return FloatProvider.Get<>().GetFloat();
+	}
+	
 	/**Accept any provider derived from FFloatProviderData
 	 * This allows you to create float provider variables like so:
 	 * FOmniFloatProvider MyProvider = FBasicFloatProvider(3000)
@@ -104,7 +109,7 @@ struct FBasicFloatProvider : public FFloatProviderData
 		BaseValue = InValue;
 	}
 
-	virtual float GetFloat() override
+	virtual float GetFloat() const override
 	{
 		return FloatValue;
 	}
@@ -118,9 +123,9 @@ struct FRuntimeFloatProvider : public FFloatProviderData
 	UPROPERTY(Category = "", EditAnywhere, BlueprintReadOnly)
 	FRuntimeFloatCurve FloatCurve;
 
-	virtual float GetFloat() override
+	virtual float GetFloat() const override
 	{
-		return FloatCurve.GetRichCurve()->Eval(BaseValue);
+		return FloatCurve.GetRichCurveConst()->Eval(BaseValue);
 	}
 };
 
@@ -156,7 +161,7 @@ struct FObjectTagValueProvider : public FFloatProviderData
 	UPROPERTY(Category = "", EditAnywhere, BlueprintReadOnly)
 	FGameplayTag Tag;
 
-	virtual float GetFloat() override
+	virtual float GetFloat() const override
 	{
 		#if ObjectTags_Enabled
 		return UObjectTags_Subsystem::GetTagValueFromObject(Tag, WorldContext.Get());
@@ -188,7 +193,7 @@ struct FDataTableFloatProvider : public FFloatProviderData
 	UPROPERTY(Category = "", EditAnywhere, BlueprintReadOnly, meta = (RowType = "/Script/OmniToolbox.FloatProviderDataTable"))
 	FDataTableRowHandle FloatTable;
 
-	virtual float GetFloat() override
+	virtual float GetFloat() const override
 	{
 		if(FloatTable.DataTable == nullptr)
 		{

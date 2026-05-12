@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
+#include "Parents/OmniAssetValidator.h"
 #include "OmniValidationSettings.generated.h"
 
 class UOmniStandardizedNamingSchema;

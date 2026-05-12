@@ -98,6 +98,25 @@ struct FMassTraceResult
     TArray<FHitResult> HitResults;
 };
 
+USTRUCT(BlueprintType)
+struct FOmniTraceChannelSettings
+{
+    explicit FOmniTraceChannelSettings(const TEnumAsByte<ETraceTypeQuery>& TraceType)
+        : TraceType(TraceType)
+    {
+        UseTraceType = true;
+    }
+
+    FOmniTraceChannelSettings() = default;
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool UseTraceType = false;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TEnumAsByte<ETraceTypeQuery> TraceType;
+};
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAsyncTraceResultDelegate, const TArray<FHitResult>&, HitResult);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FMassTraceResultDelegate, FMassTraceResult, TraceResult);
 
@@ -122,6 +141,13 @@ public:
     UFUNCTION(Category = "Trace Helpers", BlueprintCallable, BlueprintPure)
     static FCollisionResponseContainer CreateResponseContainer(FTraceChannelAndResponseContainer CustomChannelResponses);
     
+    /**Takes in an array of hit results and a world location.
+     * It then performs a line trace to each hit result to find
+     * out if they have LOS of the origin point. */
+    UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+    static void FilterHitResultsByLineOfSight(TArray<FHitResult>& HitResultsToFilter, UObject* WorldContextObject, const FVector& Start,
+        UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+    
     /**Perform a line trace.
      * @ResultType Is this a multi, single or test trace?
      * @CustomChannelResponses Allows you to assign unique responses to specific channels.
@@ -129,7 +155,7 @@ public:
      * and pass the final result to this function.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static TArray<FHitResult> LineTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Start an async line trace.
      * @ResultType Async traces do not separate the test, multi and single functions.
@@ -138,7 +164,7 @@ public:
      * is to test if the hit result has an index in it. But the data inside those hit results will be nothing.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static void AsyncLineTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Perform a sphere trace.
      * @ResultType Is this a multi, single or test trace?
@@ -147,7 +173,7 @@ public:
      * and pass the final result to this function.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static TArray<FHitResult> SphereTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, const float Radius, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Start an async sphere trace.
      * @ResultType Async traces do not separate the test, multi and single functions.
@@ -156,7 +182,7 @@ public:
      * is to test if the hit result has an index in it. But the data inside those hit results will be nothing.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static void AsyncSphereTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, const float Radius, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Perform a capsule trace.
      * @ResultType Is this a multi, single or test trace?
@@ -165,7 +191,7 @@ public:
      * and pass the final result to this function.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static TArray<FHitResult> CapsuleTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, FRotator Rotation, const float Radius, const float HalfHeight, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Start an async sphere trace.
      * @ResultType Async traces do not separate the test, multi and single functions.
@@ -174,7 +200,7 @@ public:
      * is to test if the hit result has an index in it. But the data inside those hit results will be nothing.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static void AsyncCapsuleTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, FRotator Rotation, const float Radius, const float HalfHeight, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Perform a box trace.
      * @ResultType Is this a multi, single or test trace?
@@ -183,7 +209,7 @@ public:
      * and pass the final result to this function.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static TArray<FHitResult> BoxTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, FRotator Rotation, const FVector& Extent, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const FCollisionResponseContainer& CustomChannelResponses, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, const TArray<AActor*>& IgnoredActors, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
 
     /**Start an async box trace.
      * @ResultType Async traces do not separate the test, multi and single functions.
@@ -192,12 +218,15 @@ public:
      * is to test if the hit result has an index in it. But the data inside those hit results will be nothing.*/
     UFUNCTION(BlueprintCallable, Category = "Helpers Library|Trace Helpers", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
     static void AsyncBoxTrace(UObject* WorldContextObject, const FVector& Start, const FVector& End, FRotator Rotation, const FVector& Extent, TEnumAsByte<EAsyncTraceResultType> ResultType,
-        const TArray<AActor*>& IgnoredActors, const FCollisionResponseContainer& CustomChannelResponses, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
+        const TArray<AActor*>& IgnoredActors, UPARAM(Meta=(GetOptions="Engine.KismetSystemLibrary.GetCollisionProfileNames")) FName Profile, FOmniTraceChannelSettings TraceSettings, FAsyncTraceResultDelegate OnTraceCompleted, bool TraceComplex = false, FTraceDebug DebugOptions = FTraceDebug());
     
 
 
 #pragma region Debug
 
+    /**Draw debug boxes for the hit results.
+     * Returns true if any blocking hit was found */
+    static bool DebugHitResults(const UObject* WorldContext, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
     static void HandleLineTraceDebug(const UObject* WorldContext, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
     static void HandleSphereTraceDebug(const UObject* WorldContext, const float Radius, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);
     static void HandleCapsuleTraceDebug(const UObject* WorldContext, const float Radius, const float HalfHeight, const FTraceDebug& DebugOptions, TArray<FHitResult> HitResult);

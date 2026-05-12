@@ -9,6 +9,7 @@
 #include "OmniClassPickerDialogue.h"
 #include "Config/DS_OmniToolboxSettings.h"
 #include "Developer/I_AssetDetails.h"
+#include "Factories/DataAssetFactory.h"
 #include "FunctionLibraries/OmniEditorLibrary.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "OmniToolbox/Public/OmniRuntimeMacros.h"
@@ -56,7 +57,14 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 		AssetDefinition->AssetColor = II_AssetDetails::Execute_GetAssetColor(Class->GetDefaultObject());
 		if(AssetDefinition->AssetColor.Equals(FLinearColor()))
 		{
-			AssetDefinition->AssetColor = FColor::Cyan;
+			if(AssetDefinition->Class->IsChildOf(UDataAsset::StaticClass()))
+			{
+				AssetDefinition->AssetColor = OmniToolbox::DataAssetColor;
+			}
+			else
+			{
+				AssetDefinition->AssetColor = OmniToolbox::BlueprintAssetColor;
+			}
 		}
 		
 		FString PluginName = UOmniEditorLibrary::GetPluginNameForClass(Class);
@@ -162,7 +170,7 @@ UObject* UOmniFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FNam
 	//Handle data asset creation.
 	else if(InClass->IsChildOf(UDataAsset::StaticClass()))
 	{
-		return NewObject<UObject>(InParent, InClass, InName, Flags);
+		return NewObject<UDataAsset>(InParent, InClass, InName, Flags);
 	}
 
 	return nullptr;

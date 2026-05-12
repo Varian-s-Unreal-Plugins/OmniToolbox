@@ -51,6 +51,12 @@ Omni_OnModuleStarted("OmniToolboxEditor")
 						{
 							TargetObject = EditedAsset;
 						}
+						
+						if(TargetObject == nullptr)
+						{
+							/**Asset might be broken if we hit this*/
+							break;
+						}
 
 						if(!TargetObject->Implements<UI_AssetDetails>())
 						{

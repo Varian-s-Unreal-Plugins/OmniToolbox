@@ -5,11 +5,16 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
-bool UOmniSpreadsheetObject::Initialize(const TArray<FString>& InHeaders, FString CustomDirectory, FString CustomFileName)
+void UOmniSpreadsheetObject::Initialize(const TArray<FString>& InHeaders, bool DoNotCreateFile , FString CustomDirectory, FString CustomFileName)
 {
 	for(auto& CurrentHeader : InHeaders)
 	{
 		Headers.Add(CurrentHeader);
+	}
+	
+	if(DoNotCreateFile)
+	{
+		return;
 	}
 	
 	//Create directory if missing
@@ -24,8 +29,6 @@ bool UOmniSpreadsheetObject::Initialize(const TArray<FString>& InHeaders, FStrin
 
 	FileName = CustomFileName.IsEmpty() ? FString::Printf(TEXT("%s.html"), *Timestamp) : FString::Printf(TEXT("%s.html"), *CustomFileName);
 	FilePath = Directory / FileName;
-	
-	return true;
 }
 
 bool UOmniSpreadsheetObject::Save()

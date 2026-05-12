@@ -1,0 +1,19 @@
+---
+publish: true
+---
+
+# OmniToolbox
+
+[Github link](https://github.com/Varian-s-Unreal-Plugins/OmniToolbox) | [Trello Board](https://trello.com/b/M1LkF49R/omnitoolbox) | [Discord](https://discord.gg/bBfa9pwtEn)
+
+`OmniToolbox` is a free and open-source plugin designed to provide numerous function libraries, quality-of-life editor changes and provide a foundation to improve all of my plugins.
+
+There are many features that are very impactful, but are too small to warrant their own plugin. This toolbox is essentially my collection of those features.
+
+Highlights include:
+
+* Quickly and easily add any asset into the content browser's context menu by simply adding a interface.
+* Assets can easily control their own thumbnails through a universal thumbnail renderer.
+* Many C++ functions exposed to Blueprint, such as async traces, gameplay tag utility functions.
+* Useful tools and features too small to warrant their own plugin, such as [Float Providers](https://varian.gitbook.io/varian-docs/omnitoolbox/runtime/float-providers).
+* Useful macro's and utilities to simplify C++ code.&#x20;
