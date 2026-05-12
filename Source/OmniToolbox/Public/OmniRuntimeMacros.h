@@ -39,7 +39,7 @@ struct FOmniRunOnPostEngineInitHelper
 {
 	FOmniRunOnPostEngineInitHelper(TFunction<void()> InLambda)
 	{
-		FCoreDelegates::OnPostEngineInit.AddLambda(
+		FCoreDelegates::GetOnPostEngineInit().AddLambda(
 			[InLambda]()
 			{
 				InLambda();
@@ -55,7 +55,7 @@ struct TOmniCounterDummy { TOmniCounterDummy() = default; };
 
 #define Omni_OnPostEngineInit() \
 static void OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__>); \
-static const FOmniRunOnPostEngineInitHelper PREPROCESSOR_JOIN(FOmniRunOnPostEngineInitHelper, __COUNTER__)([] \
+static const FOmniRunOnPostEngineInitHelper UE_JOIN(FOmniRunOnPostEngineInitHelper, __COUNTER__)([] \
 { \
 OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__ - 2>()); \
 }); \
@@ -63,15 +63,15 @@ static void OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__ - 3>)
 
 #define Omni_OnModuleStarted(ModuleName) \
 static void OmniStartupFunction(TOmniCounterDummy<__COUNTER__>); \
-static const FOmniRunOnStartupHelper PREPROCESSOR_JOIN(OmniRunOnStartupHelper, __COUNTER__)(ModuleName, [] \
+static const FOmniRunOnStartupHelper UE_JOIN(OmniRunOnStartupHelper, __COUNTER__)(ModuleName, [] \
 { \
 	OmniStartupFunction(TOmniCounterDummy<__COUNTER__ - 2>()); \
 }); \
 static void OmniStartupFunction(TOmniCounterDummy<__COUNTER__ - 3>)
 
 #define Omni_SetClassIcon(PluginName, ClassName, SvgName) \
-static void PREPROCESSOR_JOIN(OmniSetClassIcon_Init_, __COUNTER__)(); \
-static const FOmniRunOnStartupHelper PREPROCESSOR_JOIN(OmniSetClassIcon_Helper_, __COUNTER__)(TEXT(#PluginName), [] \
+static void UE_JOIN(OmniSetClassIcon_Init_, __COUNTER__)(); \
+static const FOmniRunOnStartupHelper UE_JOIN(OmniSetClassIcon_Helper_, __COUNTER__)(TEXT(#PluginName), [] \
 { \
 	FCoreDelegates::OnPostEngineInit.AddLambda([]() \
 	{ \
@@ -84,7 +84,7 @@ static const FOmniRunOnStartupHelper PREPROCESSOR_JOIN(OmniSetClassIcon_Helper_,
 		} \
 	}); \
 }); \
-static void PREPROCESSOR_JOIN(OmniSetClassIcon_Init_, __COUNTER__)();
+static void UE_JOIN(OmniSetClassIcon_Init_, __COUNTER__)();
 
 // #define Omni_SetClassIcon(PluginName, ClassName, SvgName)                              \
 // 	/* freeze the counter so all uses match */                                         \
@@ -151,7 +151,7 @@ struct FOmniConsoleVariableHelper
 		Name,  \
 		TEXT(Description)); \
 	\
-	static const FOmniConsoleVariableHelper PREPROCESSOR_JOIN(OmniConsoleVariableHelper, __COUNTER__)([] \
+	static const FOmniConsoleVariableHelper UE_JOIN(OmniConsoleVariableHelper, __COUNTER__)([] \
 	{ \
 		static Type LastValue = Default; \
 		if (LastValue != Name) \

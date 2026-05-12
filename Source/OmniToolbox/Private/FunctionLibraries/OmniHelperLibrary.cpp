@@ -73,7 +73,7 @@ TArray<FString> UOmniHelperLibrary::GetAllGameFeatureNames()
 TArray<UObject*> UOmniHelperLibrary::GetObjectsSubObjects(UObject* Object, bool Recursive)
 {
 	TArray<UObject*> SubObjects;
-	GetObjectsWithOuter(Object, SubObjects, Recursive);
+	GetObjectsWithOuter(Object, SubObjects, Recursive ? EGetObjectsFlags::IncludeNestedObjects : EGetObjectsFlags::None);
 	return SubObjects;
 }
 

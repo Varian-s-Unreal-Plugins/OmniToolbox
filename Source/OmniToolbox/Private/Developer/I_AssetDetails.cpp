@@ -4,6 +4,7 @@
 #include "Developer/I_AssetDetails.h"
 
 #include "OmniRuntimeMacros.h"
+#include "ToolMenus.h"
 
 #if WITH_EDITOR
 #include "Toolkits/AssetEditorToolkitMenuContext.h"
