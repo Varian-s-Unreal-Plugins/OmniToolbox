@@ -110,10 +110,10 @@ struct FOmniTraceChannelSettings
     FOmniTraceChannelSettings() = default;
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite)
     bool UseTraceType = false;
     
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite)
     TEnumAsByte<ETraceTypeQuery> TraceType;
 };
 
