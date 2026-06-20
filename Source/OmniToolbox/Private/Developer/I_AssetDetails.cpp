@@ -4,9 +4,14 @@
 #include "Developer/I_AssetDetails.h"
 
 #include "OmniRuntimeMacros.h"
-#include "ToolMenus.h"
 
 #if WITH_EDITOR
+#include "Widgets/Images/SImage.h"
+#include "Widgets/SToolTip.h"
+#include "Widgets/Input/SComboButton.h"
+#include "ToolMenus.h"
+#include "Engine/Blueprint.h"
+#include "Toolkits/AssetEditorToolkit.h"
 #include "Toolkits/AssetEditorToolkitMenuContext.h"
 #endif
 
