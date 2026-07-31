@@ -9,6 +9,8 @@
 #endif
 #include "OmniEngineSubsystem.generated.h"
 
+class FSlateStyleSet;
+
 /**
  * 
  */

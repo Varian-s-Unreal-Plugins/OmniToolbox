@@ -6,8 +6,11 @@
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
 #include "OmniRuntimeMacros.h"
+#include "TextureResource.h"
 #include "Config/DS_OmniToolboxSettings.h"
 #include "Developer/I_AssetDetails.h"
+#include "Engine/DataAsset.h"
+#include "Engine/Texture2D.h"
 
 Omni_OnModuleStarted("OmniToolbox")
 {

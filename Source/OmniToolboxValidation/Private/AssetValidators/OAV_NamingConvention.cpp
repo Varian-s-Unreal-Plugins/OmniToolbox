@@ -4,6 +4,7 @@
 #include "AssetValidators/OAV_NamingConvention.h"
 
 #include "OmniValidationSettings.h"
+#include "Engine/Blueprint.h"
 #include "Misc/DataValidation.h"
 #include "Parents/OmniStandardizedNamingSchema.h"
 

@@ -9,10 +9,12 @@
 #include "OmniClassPickerDialogue.h"
 #include "Config/DS_OmniToolboxSettings.h"
 #include "Developer/I_AssetDetails.h"
+#include "Engine/DataAsset.h"
 #include "Factories/DataAssetFactory.h"
 #include "FunctionLibraries/OmniEditorLibrary.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "OmniToolbox/Public/OmniRuntimeMacros.h"
+#include "UObject/UObjectIterator.h"
 
 Omni_OnModuleStarted("OmniToolboxEditor")
 {

@@ -5,6 +5,7 @@
 
 #include "K2Node_CallFunction.h"
 #include "OmniValidationSettings.h"
+#include "EdGraph/EdGraph.h"
 #include "Misc/DataValidation.h"
 
 bool UOAV_BlockLoad::OmniValidatorCanValidateAsset(const FAssetData& InAssetData, UObject* InObject,

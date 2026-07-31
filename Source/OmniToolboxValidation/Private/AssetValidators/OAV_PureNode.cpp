@@ -3,9 +3,11 @@
 
 #include "AssetValidators/OAV_PureNode.h"
 
+#include "EdGraphSchema_K2.h"
 #include "K2Node_BreakStruct.h"
 #include "K2Node_CallFunction.h"
 #include "OmniValidationSettings.h"
+#include "EdGraph/EdGraph.h"
 #include "Misc/DataValidation.h"
 
 namespace UE::Internal::PureNodeValidatorHelpers

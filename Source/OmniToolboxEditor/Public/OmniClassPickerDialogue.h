@@ -2,10 +2,21 @@
 
 #pragma once
 
-#define LOCTEXT_NAMESPACE "InventoryFrameworkItemCreationDialogue"
+#include "CoreMinimal.h"
+#include "Internationalization/Text.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
+#include "Editor.h"
+#include "Components/VerticalBox.h"
+#include "Factories/Factory.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SWindow.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
+#include "Widgets/Text/STextBlock.h"
+#define LOCTEXT_NAMESPACE "InventoryFrameworkItemCreationDialogue"
 
 /**The majority of the logic is copied from SGameplayAbilityBlueprintCreateDialog */
 

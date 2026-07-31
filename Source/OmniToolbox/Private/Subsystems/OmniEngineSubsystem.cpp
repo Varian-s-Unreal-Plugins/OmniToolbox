@@ -7,6 +7,7 @@
 #include "IPlacementModeModule.h"
 #endif
 #include "Interfaces/IPluginManager.h"
+#include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
 #define IMAGE_BRUSH_SVG(StyleSet, RelativePath, ...) \

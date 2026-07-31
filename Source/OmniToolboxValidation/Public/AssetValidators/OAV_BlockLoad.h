@@ -6,6 +6,7 @@
 #include "Parents/OmniAssetValidator.h"
 #include "OAV_BlockLoad.generated.h"
 
+class UEdGraphNode;
 /**
  * This validator makes sure that the "Asset Load Synchronous" is NOT used.
  */
