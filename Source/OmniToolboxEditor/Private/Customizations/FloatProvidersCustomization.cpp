@@ -11,9 +11,11 @@
 #include "IPropertyUtilities.h"
 #include "OmniRuntimeMacros.h"
 #include "PropertyBindingExtension.h"
+#include "ScopedTransaction.h"
 #include "SInstancedStructPicker.h"
 #include "StructViewerModule.h"
 #include "Widgets/Input/SSpinBox.h"
+#include "Widgets/Layout/SBox.h"
 
 Omni_OnModuleStarted(UE_MODULE_NAME)
 {

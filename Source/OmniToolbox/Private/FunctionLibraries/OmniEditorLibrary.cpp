@@ -4,6 +4,7 @@
 #include "FunctionLibraries/OmniEditorLibrary.h"
 
 #include "Blueprint/BlueprintExceptionInfo.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 #include "Engine/Console.h"
@@ -12,6 +13,7 @@
 #include "UObject/Stack.h"
 #include "VisualLogger/VisualLogger.h"
 #include "Engine/World.h"
+#include "Misc/MessageDialog.h"
 #if WITH_EDITOR
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Interfaces/IPluginManager.h"
@@ -72,8 +74,6 @@ bool UOmniEditorLibrary::ImplementInterface(UObject* InstigatingObject, UObject*
 	return true;
 
 	#endif
-
-	return false;
 }
 
 void UOmniEditorLibrary::SetObjectDisplayName(UObject* Object, const FString& NewName)

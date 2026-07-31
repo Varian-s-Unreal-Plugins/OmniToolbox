@@ -114,7 +114,7 @@ struct FOmniTraceChannelSettings
     bool UseTraceType = false;
     
     UPROPERTY(Category = "", EditAnywhere, BlueprintReadWrite)
-    TEnumAsByte<ETraceTypeQuery> TraceType;
+    TEnumAsByte<ETraceTypeQuery> TraceType = TraceTypeQuery1;
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAsyncTraceResultDelegate, const TArray<FHitResult>&, HitResult);

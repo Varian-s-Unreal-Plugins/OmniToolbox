@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AssetDefinitionDefault.h"
+#include "Factories/Factory.h"
 
 #include "OmniAssetDefinition.generated.h"
 

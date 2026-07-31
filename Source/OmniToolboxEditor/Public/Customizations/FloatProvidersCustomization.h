@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IPropertyTypeCustomization.h"
 #include "UObject/Object.h"
+#include "Widgets/SWidget.h"
+#include "Widgets/Input/SComboButton.h"
 
 
 /**
