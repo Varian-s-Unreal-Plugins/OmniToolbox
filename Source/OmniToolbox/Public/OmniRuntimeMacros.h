@@ -5,7 +5,16 @@
 #include "Subsystems/OmniEngineSubsystem.h"
 #include "OmniToolbox.h"
 #include "Misc/CoreDelegates.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Engine/Engine.h"
+
+#if UE_VERSION_NEWER_THAN_OR_EQUAL(5, 8, 0)
+#define OMNI_PREPROCESSOR_JOIN(TokenA, TokenB) UE_JOIN(TokenA, TokenB)
+#define OMNI_ON_POST_ENGINE_INIT() FCoreDelegates::GetOnPostEngineInit()
+#else
+#define OMNI_PREPROCESSOR_JOIN(TokenA, TokenB) PREPROCESSOR_JOIN(TokenA, TokenB)
+#define OMNI_ON_POST_ENGINE_INIT() FCoreDelegates::OnPostEngineInit
+#endif
 
 /**Trace with string label*/
 #define Omni_InsightsTrace_Str(Text) TRACE_CPUPROFILER_EVENT_SCOPE_STR(Text)
@@ -39,7 +48,7 @@ struct FOmniRunOnPostEngineInitHelper
 {
 	FOmniRunOnPostEngineInitHelper(TFunction<void()> InLambda)
 	{
-		FCoreDelegates::GetOnPostEngineInit().AddLambda(
+		OMNI_ON_POST_ENGINE_INIT().AddLambda(
 			[InLambda]()
 			{
 				InLambda();
@@ -55,7 +64,7 @@ struct TOmniCounterDummy { TOmniCounterDummy() = default; };
 
 #define Omni_OnPostEngineInit() \
 static void OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__>); \
-static const FOmniRunOnPostEngineInitHelper UE_JOIN(FOmniRunOnPostEngineInitHelper, __COUNTER__)([] \
+static const FOmniRunOnPostEngineInitHelper OMNI_PREPROCESSOR_JOIN(FOmniRunOnPostEngineInitHelper, __COUNTER__)([] \
 { \
 OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__ - 2>()); \
 }); \
@@ -63,17 +72,17 @@ static void OmniPostEngineInitFunction(TOmniCounterDummy<__COUNTER__ - 3>)
 
 #define Omni_OnModuleStarted(ModuleName) \
 static void OmniStartupFunction(TOmniCounterDummy<__COUNTER__>); \
-static const FOmniRunOnStartupHelper UE_JOIN(OmniRunOnStartupHelper, __COUNTER__)(ModuleName, [] \
+static const FOmniRunOnStartupHelper OMNI_PREPROCESSOR_JOIN(OmniRunOnStartupHelper, __COUNTER__)(ModuleName, [] \
 { \
 	OmniStartupFunction(TOmniCounterDummy<__COUNTER__ - 2>()); \
 }); \
 static void OmniStartupFunction(TOmniCounterDummy<__COUNTER__ - 3>)
 
 #define Omni_SetClassIcon(PluginName, ClassName, SvgName) \
-static void UE_JOIN(OmniSetClassIcon_Init_, __COUNTER__)(); \
-static const FOmniRunOnStartupHelper UE_JOIN(OmniSetClassIcon_Helper_, __COUNTER__)(TEXT(#PluginName), [] \
+static void OMNI_PREPROCESSOR_JOIN(OmniSetClassIcon_Init_, __COUNTER__)(); \
+static const FOmniRunOnStartupHelper OMNI_PREPROCESSOR_JOIN(OmniSetClassIcon_Helper_, __COUNTER__)(TEXT(#PluginName), [] \
 { \
-	FCoreDelegates::OnPostEngineInit.AddLambda([]() \
+	OMNI_ON_POST_ENGINE_INIT().AddLambda([]() \
 	{ \
 		if (GEngine && GEngine->IsInitialized()) \
 		{ \
@@ -84,7 +93,7 @@ static const FOmniRunOnStartupHelper UE_JOIN(OmniSetClassIcon_Helper_, __COUNTER
 		} \
 	}); \
 }); \
-static void UE_JOIN(OmniSetClassIcon_Init_, __COUNTER__)();
+static void OMNI_PREPROCESSOR_JOIN(OmniSetClassIcon_Init_, __COUNTER__)();
 
 // #define Omni_SetClassIcon(PluginName, ClassName, SvgName)                              \
 // 	/* freeze the counter so all uses match */                                         \
@@ -151,7 +160,7 @@ struct FOmniConsoleVariableHelper
 		Name,  \
 		TEXT(Description)); \
 	\
-	static const FOmniConsoleVariableHelper UE_JOIN(OmniConsoleVariableHelper, __COUNTER__)([] \
+	static const FOmniConsoleVariableHelper OMNI_PREPROCESSOR_JOIN(OmniConsoleVariableHelper, __COUNTER__)([] \
 	{ \
 		static Type LastValue = Default; \
 		if (LastValue != Name) \

@@ -16,7 +16,7 @@ struct FVanguardScalabilityPerfTestSettings
 	float HitchDeltaThreshold = 10;
 	
 	UPROPERTY(Category = "Functional Test", EditAnywhere, Config)
-	float TargetGameThreadTime = 16.66;
+	float TargetGameThreadTime = 16.66f;
 };
 
 /**
@@ -42,7 +42,7 @@ public:
 	float HitchDeltaThreshold = 10;
 	
 	UPROPERTY(Category = "Functional Test", EditAnywhere, Config)
-	float TargetGameThreadTime = 16.66;
+	float TargetGameThreadTime = 16.66f;
 	
 	UPROPERTY(Category = "Functional Test", EditAnywhere, Config)
 	FVanguardScalabilityPerfTestSettings ScalabilityPerfTestSettings[5];
